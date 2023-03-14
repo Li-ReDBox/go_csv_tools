@@ -21,3 +21,10 @@ func TestRead(t *testing.T) {
 		fmt.Println()
 	}
 }
+
+func TestCreateRecords(t *testing.T) {
+	records := CreateRecords()
+	if len(records) == 0 {
+		t.Errorf("Want size to be greater than 0, but %d", len(records))
+	}
+}

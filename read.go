@@ -23,3 +23,18 @@ Ken,Thompson,ken
 	fmt.Print(records)
 	return records
 }
+
+func CreateRecords() []map[string]string {
+	var records []map[string]string
+	lines := Read()
+	row := make(map[string]string)
+
+	for i := 1; i < len(lines); i++ {
+		for j, c := range lines[i] {
+			row[lines[0][j]] = c
+		}
+		records = append(records, row)
+	}
+
+	return records
+}
