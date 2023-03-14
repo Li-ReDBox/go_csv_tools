@@ -38,3 +38,15 @@ func CreateRecords() []map[string]string {
 
 	return records
 }
+
+type Title map[string]int
+
+// CreateTitle returns a Title from the input of a slice of string.
+// The value of each entry is the zero-base column number from a csv file.
+func CreateTitle(names []string) Title {
+	t := make(Title)
+	for i, n := range names {
+		t[n] = i
+	}
+	return t
+}
