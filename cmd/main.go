@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 
 	"funmech.com/csv"
@@ -32,16 +31,9 @@ func main() {
 
 	fmt.Println("We will be process csv = ", *csvFile)
 
-	file, err := os.Open(*csvFile)
+	p := csv.NewProcessor(*csvFile)
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	fmt.Printf("Loaded data from %s, its has size of %v\n", *csvFile, fmt.Sprint(p.Size()))
 
-	p := csv.Processor{}
-	p.Read(file)
-
-	if err := file.Close(); err != nil {
-		log.Fatal(err)
-	}
+	p.Print()
 }
