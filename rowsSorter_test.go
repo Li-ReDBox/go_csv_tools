@@ -200,6 +200,8 @@ type comparable interface {
 	~string | ~int | ~float32 | ~float64
 }
 
+// compare returns -1 to indicate p is less then q, 1 to indicate p is greater than q,
+// 0 to indicate they are equal.
 func compare[C comparable](p, q C) int {
 	if p < q {
 		return -1
