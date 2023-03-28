@@ -55,11 +55,11 @@ func (cols intColumns) less(n, i, j int) int {
 func (rows Rows) Less(i, j int) bool {
 	// which columns are used in comparison
 	// all markers need to be less
-	fmt.Println(rows[i], "vs", rows[j])
+	// fmt.Println(rows[i], "vs", rows[j])
 	markers := []int{0, 2}
 	var m, order int
 	for m = 0; m < len(markers)-1; m++ {
-		fmt.Printf("Compare marker %d, check %s < %s\n", markers[m], rows[i][markers[m]], rows[j][markers[m]])
+		// fmt.Printf("Compare marker %d, check %s < %s\n", markers[m], rows[i][markers[m]], rows[j][markers[m]])
 		if validInt.MatchString(rows[i][markers[m]]) && validInt.MatchString(rows[j][markers[m]]) {
 			p, _ := strconv.Atoi(rows[i][markers[m]])
 			q, _ := strconv.Atoi(rows[j][markers[m]])
@@ -85,7 +85,7 @@ func (rows Rows) Less(i, j int) bool {
 		// 	return false
 		// }
 	}
-	fmt.Printf("Compare the last marker %d, check '%s' < '%s', result = %t\n", markers[m], rows[i][markers[m]], rows[j][markers[m]], rows[i][markers[m]] < rows[j][markers[m]])
+	// fmt.Printf("Compare the last marker %d, check '%s' < '%s', result = %t\n", markers[m], rows[i][markers[m]], rows[j][markers[m]], rows[i][markers[m]] < rows[j][markers[m]])
 	if validInt.MatchString(rows[i][markers[m]]) && validInt.MatchString(rows[j][markers[m]]) {
 		p, _ := strconv.Atoi(rows[i][markers[m]])
 		q, _ := strconv.Atoi(rows[j][markers[m]])
@@ -95,7 +95,7 @@ func (rows Rows) Less(i, j int) bool {
 	}
 }
 
-func TestRows(t *testing.T) {
+func Example_sortRows() {
 	var rows Rows = Rows{
 		{"gri", "Go", "100"},
 		{"ken", "C", "150"},
@@ -107,35 +107,15 @@ func TestRows(t *testing.T) {
 		{"r", "C", "150"},
 		{"gri", "Smalltalk", "80"},
 	}
-	// var rows Rows = Rows{
-	// 	{"z", "1", "d"},
-	// 	{"b", "2", "y"},
-	// 	{"c", "3", "b"},
-	// 	{"c", "3", "d"},
-	// }
+
 	sort.Sort(&rows)
 
-	if "Robert" > "first_name" {
-		t.Errorf("Robert is actually > first_name which is bizarre.\n")
-	}
-
-	if !("Ken" < "Rob" && "Rob" < "Robert" && "Robert" < "first_name") {
-		t.Errorf("Column 0 comparison failed, wanted %s", "Ken < Rob < Robert < first_name")
-	}
-
-	if "ken" < "rob" && "rob" < "gri" && "gri" < "username" {
-		t.Errorf("Column 2 comparison failed, wanted %s", "ken < rob < gri < username")
-	}
-
 	fmt.Println(rows)
+	// Output:
+	// [[dmr C 100] [glenda Go 200] [gri Smalltalk 80] [gri Go 100] [ken C 150] [ken Go 200] [r Go 100] [r C 150] [rsc Go 200]]
 }
 
 /*
-sorted by 0 only
-[[dmr C 100] [glenda Go 200] [gri Smalltalk 80] [gri Go 100] [ken Go 200] [ken C 150] [r C 150] [r Go 100] [rsc Go 200]]
-sorted by 0 then 2
-[[dmr C 100] [glenda Go 200] [gri Go 100] [gri Smalltalk 80] [ken C 150] [ken Go 200] [r C 150] [r Go 100] [rsc Go 200]]
-
 excel sorting:
 dmr	C	100
 glenda	Go	200
@@ -147,15 +127,6 @@ r	Go	100
 r	C	150
 rsc	Go	200
 
-
-
-Excel
-b	2	y
-c	3	b
-c	3	d
-z	1	d
-
-[[b 2 y] [c 3 b] [c 3 d] [z 1 d]]
 */
 
 func TestCompareNumStrings(t *testing.T) {
