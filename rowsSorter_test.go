@@ -23,12 +23,34 @@ func (rows Rows) Swap(i, j int) {
 	rows[i], rows[j] = rows[j], rows[i]
 }
 
+// slices of int type data columns, the indicators is not enough
+// the key is the column index of original data, the value is the index of intColumns
+var intTypes = make(map[int]int)
+
+type intColumns [][]int
+
+func (cols intColumns) less(n, i, j int) int {
+	p, q := cols[n][i], cols[n][j]
+	switch {
+	case p < q:
+		// p < q, so we have a decision.
+		return -1
+	case p > q:
+		// p > q, so we have a decision.
+		return 1
+	}
+	return 0
+}
+
 // Less is part of sort.Interface. It is implemented by looping along the
 // less functions until it finds a comparison that discriminates between
 // the two items (one is less than the other). Note that it can call the
 // less functions twice per call. We could change the functions to return
 // -1, 0, 1 and reduce the number of calls for greater efficiency: an
 // exercise for the reader.
+
+// This is a multiple key comparison, its priorities are defined by the order to markers.
+// Only the higher priority marker cannot make an decision, it passes on to the next marker.
 func (rows Rows) Less(i, j int) bool {
 	// which columns are used in comparison
 	// all markers need to be less
@@ -37,14 +59,23 @@ func (rows Rows) Less(i, j int) bool {
 	var m int
 	for m = 0; m < len(markers)-1; m++ {
 		fmt.Printf("Compare marker %d, check %s < %s\n", markers[m], rows[i][markers[m]], rows[j][markers[m]])
-		switch {
-		case rows[i][markers[m]] < rows[j][markers[m]]:
-			// p < q, so we have a decision.
-			return true
-		case rows[i][markers[m]] > rows[j][markers[m]]:
-			// p > q, so we have a decision.
-			return false
+		order := compare(rows[i][markers[m]], rows[j][markers[m]])
+		if order != 0 {
+			switch order {
+			case -1:
+				return true
+			case 1:
+				return false
+			}
 		}
+		// switch {
+		// case rows[i][markers[m]] < rows[j][markers[m]]:
+		// 	// p < q, so we have a decision.
+		// 	return true
+		// case rows[i][markers[m]] > rows[j][markers[m]]:
+		// 	// p > q, so we have a decision.
+		// 	return false
+		// }
 	}
 	fmt.Printf("Compare the last marker %d, check '%s' < '%s', result = %t\n", markers[m], rows[i][markers[m]], rows[j][markers[m]], rows[i][markers[m]] < rows[j][markers[m]])
 	return rows[i][markers[m]] < rows[j][markers[m]]
@@ -202,5 +233,34 @@ func TestFindInts(t *testing.T) {
 	}
 	if isInt[0] || isInt[1] || !isInt[2] {
 		t.Errorf("Expected false, false, true, but had %v\n", isInt)
+	}
+}
+
+type comparable interface {
+	~string | ~int | ~float32 | ~float64
+}
+
+func compare[C comparable](p, q C) int {
+	if p < q {
+		return -1
+	} else if p > q {
+		return 1
+	}
+
+	return 0
+}
+
+func TestCompare(t *testing.T) {
+	if compare(1, 2) != -1 {
+		t.Errorf("int compare failed")
+	}
+	if compare(1.0, 2.0) != -1 {
+		t.Errorf("int compare failed")
+	}
+	if compare("1", "2") != -1 {
+		t.Errorf("int compare failed")
+	}
+	if compare(float64(1), float64(2)) != -1 {
+		t.Errorf("int compare failed")
 	}
 }
