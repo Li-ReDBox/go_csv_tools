@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"sort"
+	"strconv"
 	"testing"
 )
 
@@ -56,10 +57,17 @@ func (rows Rows) Less(i, j int) bool {
 	// all markers need to be less
 	fmt.Println(rows[i], "vs", rows[j])
 	markers := []int{0, 2}
-	var m int
+	var m, order int
 	for m = 0; m < len(markers)-1; m++ {
 		fmt.Printf("Compare marker %d, check %s < %s\n", markers[m], rows[i][markers[m]], rows[j][markers[m]])
-		order := compare(rows[i][markers[m]], rows[j][markers[m]])
+		if validInt.MatchString(rows[i][markers[m]]) && validInt.MatchString(rows[j][markers[m]]) {
+			p, _ := strconv.Atoi(rows[i][markers[m]])
+			q, _ := strconv.Atoi(rows[j][markers[m]])
+			order = compare(p, q)
+		} else {
+			order = compare(rows[i][markers[m]], rows[j][markers[m]])
+		}
+
 		if order != 0 {
 			switch order {
 			case -1:
@@ -78,7 +86,13 @@ func (rows Rows) Less(i, j int) bool {
 		// }
 	}
 	fmt.Printf("Compare the last marker %d, check '%s' < '%s', result = %t\n", markers[m], rows[i][markers[m]], rows[j][markers[m]], rows[i][markers[m]] < rows[j][markers[m]])
-	return rows[i][markers[m]] < rows[j][markers[m]]
+	if validInt.MatchString(rows[i][markers[m]]) && validInt.MatchString(rows[j][markers[m]]) {
+		p, _ := strconv.Atoi(rows[i][markers[m]])
+		q, _ := strconv.Atoi(rows[j][markers[m]])
+		return p < q
+	} else {
+		return rows[i][markers[m]] < rows[j][markers[m]]
+	}
 }
 
 func TestRows(t *testing.T) {
@@ -111,31 +125,6 @@ func TestRows(t *testing.T) {
 
 	if "ken" < "rob" && "rob" < "gri" && "gri" < "username" {
 		t.Errorf("Column 2 comparison failed, wanted %s", "ken < rob < gri < username")
-	}
-
-	// this is to remind me sorting of strings is different to numbers.
-	if "80" > "100" {
-		// '313030=100' < '3830=80' = true
-		/*
-					int32
-			runtime·strcmp(byte *s1, byte *s2)
-			{
-			    uintptr i;
-			    byte c1, c2;
-
-			    for(i=0;; i++) {
-			        c1 = s1[i];
-			        c2 = s2[i];
-			        if(c1 < c2)
-			            return -1;
-			        if(c1 > c2)
-			            return +1;
-			        if(c1 == 0)
-			            return 0;
-			    }
-			}
-		*/
-		t.Errorf("I think string 80 should be less then 100, actually less check returns %t\n", "80" < "100")
 	}
 
 	fmt.Println(rows)
