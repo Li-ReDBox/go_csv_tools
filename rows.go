@@ -36,7 +36,8 @@ func OrderByColumns(rows Rows, markers []int) *rowsSorter {
 	}
 }
 
-// rowsSorter implements the Sort interface, sorting the changes within.
+// rowsSorter implements the Sort interface, sorting the rows by markers (prioritised columns)
+// Currently it can handle string and int typed columns
 type rowsSorter struct {
 	rows    Rows
 	markers []int
@@ -63,9 +64,10 @@ func (byCols *rowsSorter) Less(i, j int) bool {
 	// all markers need to be less
 	// fmt.Println(rows[i], "vs", rows[j])
 	var order, marker int
+	nMarker := len(byCols.markers)
 
 	// Check first markers, if i equals to j on the marker, continue to the next marker
-	for m := 0; m < len(byCols.markers)-1; m++ {
+	for m := 0; m < nMarker; m++ {
 		marker = byCols.markers[m]
 
 		// fmt.Printf("Compare marker %d, check %s < %s\n", marker, rows[i][marker], rows[j][marker])
@@ -84,7 +86,7 @@ func (byCols *rowsSorter) Less(i, j int) bool {
 			order = compare(byCols.rows[i][marker], byCols.rows[j][marker])
 		}
 
-		if order != 0 {
+		if order != 0 && m < nMarker-1 {
 			switch order {
 			case -1:
 				return true
@@ -93,24 +95,7 @@ func (byCols *rowsSorter) Less(i, j int) bool {
 			}
 		}
 	}
-
-	// i and j are equal on all previous markers, with the last marker we just need to check if i is really less than j
-	marker = byCols.markers[len(byCols.markers)-1]
-	// fmt.Printf("Compare the last marker %d, check '%s' < '%s', result = %t\n", marker, rows[i][marker], rows[j][marker], rows[i][marker] < rows[j][marker])
-	if _, exists := byCols.intColumns[marker]; exists {
-		// fmt.Printf("last checker: %d has been checked before\n", marker)
-		p, _ := strconv.Atoi(byCols.rows[i][marker])
-		q, _ := strconv.Atoi(byCols.rows[j][marker])
-		return p < q
-	} else if validInt.MatchString(byCols.rows[i][marker]) && validInt.MatchString(byCols.rows[j][marker]) {
-		// fmt.Printf("last checker: Adding %d as int column\n", marker)
-		byCols.intColumns[marker] = struct{}{}
-		p, _ := strconv.Atoi(byCols.rows[i][marker])
-		q, _ := strconv.Atoi(byCols.rows[j][marker])
-		return p < q
-	} else {
-		return byCols.rows[i][marker] < byCols.rows[j][marker]
-	}
+	return order == -1
 }
 
 // Sort sorts the argument slice according to the less functions passed to OrderedBy.
