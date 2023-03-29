@@ -133,8 +133,23 @@ func TestReorder(t *testing.T) {
 	}
 }
 
-func TestSort(t *testing.T) {
-	data := basicRows()
-	fmt.Printf("[:][2]: %v\n", data[:][2])
-	fmt.Printf("[2][:]: %v\n", data[2][:])
+func ExampleProcessor_Sort() {
+	p := &Processor{}
+	p.rows = numbersAsStrings()
+	p.Sort([]int{0, 2})
+	p.Print()
+
+	// Output:
+	// Titles:
+	//
+	// Rows:
+	// 1, [dmr C 100]
+	// 2, [glenda Go 200]
+	// 3, [gri Smalltalk 80]
+	// 4, [gri Go 100]
+	// 5, [ken C 150]
+	// 6, [ken Go 200]
+	// 7, [r Go 100]
+	// 8, [r C 150]
+	// 9, [rsc Go 200]
 }

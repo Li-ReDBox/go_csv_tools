@@ -72,6 +72,12 @@ func (p *Processor) Print() {
 	fmt.Println()
 
 }
+
+func (p *Processor) Sort(markers []int) {
+	sorter := OrderByColumns()
+	sorter.Sort(p.rows, markers)
+}
+
 func (p *Processor) Export(name string, titles Title, content []string) {
 
 }
