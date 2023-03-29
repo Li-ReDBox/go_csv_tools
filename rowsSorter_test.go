@@ -6,20 +6,9 @@ import (
 )
 
 func Example_sortRows() {
-	var rows Rows = Rows{
-		{"gri", "Go", "100"},
-		{"ken", "C", "150"},
-		{"glenda", "Go", "200"},
-		{"rsc", "Go", "200"},
-		{"r", "Go", "100"},
-		{"ken", "Go", "200"},
-		{"dmr", "C", "100"},
-		{"r", "C", "150"},
-		{"gri", "Smalltalk", "80"},
-	}
-
-	sorter := OrderByColumns(rows, []int{0, 2})
-	sorter.Sort()
+	rows := numbersAsStrings()
+	sorter := OrderByColumns()
+	sorter.Sort(rows, []int{0, 2})
 
 	fmt.Println(rows)
 	// Output:
