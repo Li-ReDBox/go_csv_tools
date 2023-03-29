@@ -189,7 +189,7 @@ func TestFindInts(t *testing.T) {
 }
 
 type comparable interface {
-	~string | ~int | ~float32 | ~float64
+	~string | ~int | ~float64
 }
 
 // compare returns -1 to indicate p is less then q, 1 to indicate p is greater than q,
