@@ -134,14 +134,13 @@ func TestReorder(t *testing.T) {
 }
 
 func ExampleProcessor_Sort() {
-	p := &Processor{}
-	p.rows = numbersAsStrings()
+	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
 	p.Sort([]int{0, 2})
 	p.Print()
 
 	// Output:
 	// Titles:
-	//
+	// map[scores:2 sub:1 user:0]
 	// Rows:
 	// 1, [dmr C 100]
 	// 2, [glenda Go 200]

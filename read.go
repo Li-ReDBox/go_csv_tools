@@ -60,10 +60,7 @@ func (p *Processor) Size() (int, int) {
 
 func (p *Processor) Print() {
 	fmt.Println("Titles:")
-	for t := range p.titles {
-		fmt.Printf("%s\t", t)
-	}
-	fmt.Println()
+	fmt.Printf("%v\n", p.titles)
 
 	fmt.Println("Rows:")
 	for i, r := range p.rows {
