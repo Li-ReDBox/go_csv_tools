@@ -8,14 +8,16 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-func TestRead(t *testing.T) {
-	in := `first_name,last_name,username
+func basicData() string {
+	return `first_name,last_name,username
 "Rob","Pike",rob
 Ken,Thompson,ken
 "Robert","Griesemer","gri"
 `
+}
 
-	records := read(strings.NewReader(in))
+func TestRead(t *testing.T) {
+	records := read(strings.NewReader(basicData()))
 	fmt.Println(records)
 
 	if len(records) == 0 {
@@ -31,13 +33,29 @@ Ken,Thompson,ken
 	}
 }
 
-func TestCreateRecords(t *testing.T) {
-	rows := [][]string{
+func basicRows() [][]string {
+	return [][]string{
 		{"first_name", "last_name", "username"},
 		{"Rob", "Pike", "rob"},
 		{"Ken", "Thompson", "ken"},
 		{"Robert", "Griesemer", "gri"},
 	}
+}
+
+func numbersAsStrings() [][]string {
+	return [][]string{{"gri", "Go", "100"},
+		{"ken", "C", "150"},
+		{"glenda", "Go", "200"},
+		{"rsc", "Go", "200"},
+		{"r", "Go", "100"},
+		{"ken", "Go", "200"},
+		{"dmr", "C", "100"},
+		{"r", "C", "150"},
+		{"gri", "Smalltalk", "80"},
+	}
+}
+func TestCreateRecords(t *testing.T) {
+	rows := basicRows()
 
 	want := [...]map[string]string{
 		{"first_name": "Rob",
@@ -75,4 +93,48 @@ func TestCreateTitle(t *testing.T) {
 	if !maps.Equal(titles, want) {
 		t.Errorf("CreateTitle() = %v, want %v", titles, want)
 	}
+}
+
+func sum(in [][]int8, c int) int8 {
+	var total int8 = 0
+	for _, v := range in {
+		total += v[c]
+	}
+	fmt.Printf("sum of column %d = %d\n", c, total)
+	return total
+}
+
+func TestReorder(t *testing.T) {
+	names := [...]string{"first_name", "last_name", "username"}
+
+	var count int8 = 5
+	var checker int8
+
+	data := [][]int8{
+		{0, 1, 2},
+		{0, 1, 2},
+		{0, 1, 2},
+		{0, 1, 2},
+		{0, 1, 2},
+	}
+
+	titles := createTitle(names[:])
+
+	for _, o := range [...]int{2, 0, 1} {
+		if titles[names[o]] != o {
+			t.Errorf("Order is %d, want %d\n", titles[names[o]], o)
+		}
+		// this is not the way to slice a slice of a slice, data[o][:] or data[:][o] equals to data[o]
+		// so this test always fails
+		checker = sum(data, o) / count
+		if checker != int8(o) {
+			t.Errorf("checker is %d, want %d\n", checker, o)
+		}
+	}
+}
+
+func TestSort(t *testing.T) {
+	data := basicRows()
+	fmt.Printf("[:][2]: %v\n", data[:][2])
+	fmt.Printf("[2][:]: %v\n", data[2][:])
 }
