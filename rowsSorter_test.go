@@ -2,7 +2,6 @@ package csv
 
 import (
 	"fmt"
-	"sort"
 	"testing"
 )
 
@@ -19,7 +18,8 @@ func Example_sortRows() {
 		{"gri", "Smalltalk", "80"},
 	}
 
-	sort.Sort(&rows)
+	sorter := OrderByColumns(rows, []int{0, 2})
+	sorter.Sort()
 
 	fmt.Println(rows)
 	// Output:
