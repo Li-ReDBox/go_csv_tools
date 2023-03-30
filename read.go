@@ -6,7 +6,24 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 )
+
+const titleNotFoundPrefix = "csv/TitleNotFound"
+
+// TitleMisMatchError describes an error when a user provided title cannot be found in a given Title.
+type TitleNotFound struct {
+	// Message describes which title is not found
+	Message string
+}
+
+func (e TitleNotFound) Error() string {
+	return titleNotFoundPrefix + ": " + e.Message
+}
+
+func (e TitleNotFound) Is(err error) bool {
+	return strings.HasPrefix(err.Error(), titleNotFoundPrefix)
+}
 
 type Title map[string]int
 

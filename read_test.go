@@ -1,6 +1,7 @@
 package csv
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -233,4 +234,21 @@ func ExampleProcessor_Sort_mixed() {
 	// 7, [r C 150]
 	// 8, [r Go 100]
 	// 9, [rsc Go 200]
+}
+
+func TestTitleNotFound_Is(t *testing.T) {
+	var err error = TitleNotFound{"A title is not found"}
+
+	if err.Error() != "csv/TitleNotFound: A title is not found" {
+		t.Errorf("TitleNotFound message is not well formatted")
+	}
+
+	if !errors.Is(err, TitleNotFound{}) {
+		t.Errorf("TitleNotFound Is method does not work")
+	}
+
+	err = errors.New("This is not TitleNotFound")
+	if errors.Is(err, TitleNotFound{}) {
+		t.Errorf("TitleNotFound Is method does not work, misclassified %s", err)
+	}
 }
