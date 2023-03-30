@@ -27,30 +27,28 @@ func (e TitleNotFound) Is(err error) bool {
 
 type Title map[string]int
 
-func (t Title) index(names []string) []int {
+func (t Title) index(names []string) ([]int, error) {
 	indexes := make([]int, len(names))
 	for i, n := range names {
 		if ind, exists := t[n]; exists {
 			indexes[i] = ind
 		} else {
-			// FIXME: return an Error instead of -1 causing panic
-			indexes[i] = -1
+			return nil, TitleNotFound{fmt.Sprintf("%s cannot be found", n)}
 		}
 	}
-	return indexes
+	return indexes, nil
 }
 
-func (t Title) sortingMarkers(nm []NamedMarker) []Marker {
+func (t Title) sortingMarkers(nm []NamedMarker) ([]Marker, error) {
 	markers := make([]Marker, len(nm))
 	for i, m := range nm {
 		if ind, exists := t[m.Name]; exists {
 			markers[i] = Marker{ind, m.Order}
 		} else {
-			// FIXME: return an Error instead of set Index to -1 causing panic
-			markers[i] = Marker{Index: -1}
+			return nil, TitleNotFound{fmt.Sprintf("%s cannot be found", m.Name)}
 		}
 	}
-	return markers
+	return markers, nil
 }
 
 type Processor struct {

@@ -100,57 +100,37 @@ func TestCreateTitle(t *testing.T) {
 func TestTitle_sortingMarkers(t *testing.T) {
 	input := Title{"a": 0, "b": 1, "c": 2}
 
-	type args struct {
-		nm []NamedMarker
-	}
-	tests := []struct {
-		name string
-		tr   Title
-		args args
-		want []Marker
-	}{
-		{
-			"All presented", input, args{[]NamedMarker{{"a", Ascending}, {"b", Ascending}, {"c", Descending}}}, []Marker{{0, Ascending}, {1, Ascending}, {2, Descending}},
-		},
-		{
-			"Wrong name", input, args{[]NamedMarker{{"out of range", Ascending}, {"b", Ascending}}}, []Marker{{}, {1, Ascending}},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.tr.sortingMarkers(tt.args.nm); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Title.sortingMarkers() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	t.Run("All presented", func(t *testing.T) {
+		want := []Marker{{0, Ascending}, {1, Ascending}, {2, Descending}}
+		got, err := input.sortingMarkers([]NamedMarker{{"a", Ascending}, {"b", Ascending}, {"c", Descending}})
+		if !(err == nil && reflect.DeepEqual(got, want)) {
+			t.Errorf("Title.sortingMarkers() = %v, want %v", got, want)
+		}
+	})
+	t.Run("Wrong name", func(t *testing.T) {
+		got, err := input.sortingMarkers([]NamedMarker{{"out of range", Ascending}, {"b", Ascending}})
+		if err != nil && got != nil {
+			t.Errorf("Title.sortingMarkers() should has a non-nil error, but it is %s, markers should be nil, but %v", err, got)
+		}
+	})
 }
 
 func TestTitle_index(t *testing.T) {
-	type args struct {
-		names []string
-	}
-
 	input := Title{"a": 0, "b": 1, "c": 2}
-	tests := []struct {
-		name string
-		tr   Title
-		args args
-		want []int
-	}{
-		{
-			"All presented", input, args{[]string{"a", "b", "c"}}, []int{0, 1, 2},
-		},
-		{
-			"Wrong name", input, args{[]string{"out of range"}}, []int{-1},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.tr.index(tt.args.names); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Title.index() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+
+	t.Run("All presented", func(t *testing.T) {
+		want := []int{0, 1, 2}
+		got, err := input.index([]string{"a", "b", "c"})
+		if !(err == nil && reflect.DeepEqual(got, want)) {
+			t.Errorf("Title.index() = %v, want %v\n", got, want)
+		}
+	})
+	t.Run("Wrong name", func(t *testing.T) {
+		got, err := input.index([]string{"out of range"})
+		if err != nil && got != nil {
+			t.Errorf("Title.index() should has a non-nil error, but it is %s, markers should be nil, but %v", err, got)
+		}
+	})
 }
 
 func sum(in [][]int8, c int) int8 {
@@ -218,8 +198,11 @@ func ExampleProcessor_Sort_mixed() {
 	nms := []NamedMarker{{"user", Ascending}, {"scores", Descending}}
 
 	p := &Processor{titles, numbersAsStrings()}
-	p.Sort(titles.sortingMarkers(nms))
-	p.Print()
+	markers, err := titles.sortingMarkers(nms)
+	if err == nil {
+		p.Sort(markers)
+		p.Print()
+	}
 
 	// Output:
 	// Titles:
