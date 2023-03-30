@@ -220,18 +220,18 @@ func ExampleProcessor_Sort_mixed() {
 }
 
 func TestTitleNotFound_Is(t *testing.T) {
-	var err error = TitleNotFound{"A title is not found"}
+	var err error = &TitleNotFound{"A title is not found"}
 
 	if err.Error() != "csv/TitleNotFound: A title is not found" {
 		t.Errorf("TitleNotFound message is not well formatted")
 	}
 
-	if !errors.Is(err, TitleNotFound{}) {
+	if !errors.Is(err, &TitleNotFound{}) {
 		t.Errorf("TitleNotFound Is method does not work")
 	}
 
 	err = errors.New("This is not TitleNotFound")
-	if errors.Is(err, TitleNotFound{}) {
+	if errors.Is(err, &TitleNotFound{}) {
 		t.Errorf("TitleNotFound Is method does not work, misclassified %s", err)
 	}
 }

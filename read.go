@@ -17,11 +17,11 @@ type TitleNotFound struct {
 	Message string
 }
 
-func (e TitleNotFound) Error() string {
+func (e *TitleNotFound) Error() string {
 	return titleNotFoundPrefix + ": " + e.Message
 }
 
-func (e TitleNotFound) Is(err error) bool {
+func (e *TitleNotFound) Is(err error) bool {
 	return strings.HasPrefix(err.Error(), titleNotFoundPrefix)
 }
 
@@ -33,7 +33,7 @@ func (t Title) index(names []string) ([]int, error) {
 		if ind, exists := t[n]; exists {
 			indexes[i] = ind
 		} else {
-			return nil, TitleNotFound{fmt.Sprintf("%s cannot be found", n)}
+			return nil, &TitleNotFound{fmt.Sprintf("%s cannot be found", n)}
 		}
 	}
 	return indexes, nil
@@ -45,7 +45,7 @@ func (t Title) sortingMarkers(nm []NamedMarker) ([]Marker, error) {
 		if ind, exists := t[m.Name]; exists {
 			markers[i] = Marker{ind, m.Order}
 		} else {
-			return nil, TitleNotFound{fmt.Sprintf("%s cannot be found", m.Name)}
+			return nil, &TitleNotFound{fmt.Sprintf("%s cannot be found", m.Name)}
 		}
 	}
 	return markers, nil
