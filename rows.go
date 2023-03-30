@@ -38,6 +38,11 @@ type Marker struct {
 	Order Direction
 }
 
+type NamedMarker struct {
+	Name  string
+	Order Direction
+}
+
 // OrderByColumns creates a rowsSorter with a slice of Marker.
 // It is anticipated to have all the markers presents in the data
 // to be sorted. If any index is out of range, it will panic:

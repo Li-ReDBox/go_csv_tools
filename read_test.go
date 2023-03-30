@@ -2,6 +2,7 @@ package csv
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -95,6 +96,62 @@ func TestCreateTitle(t *testing.T) {
 	}
 }
 
+func TestTitle_sortingMarkers(t *testing.T) {
+	input := Title{"a": 0, "b": 1, "c": 2}
+
+	type args struct {
+		nm []NamedMarker
+	}
+	tests := []struct {
+		name string
+		tr   Title
+		args args
+		want []Marker
+	}{
+		{
+			"All presented", input, args{[]NamedMarker{{"a", Ascending}, {"b", Ascending}, {"c", Descending}}}, []Marker{{0, Ascending}, {1, Ascending}, {2, Descending}},
+		},
+		{
+			"Wrong name", input, args{[]NamedMarker{{"out of range", Ascending}, {"b", Ascending}}}, []Marker{{}, {1, Ascending}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.tr.sortingMarkers(tt.args.nm); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Title.sortingMarkers() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTitle_index(t *testing.T) {
+	type args struct {
+		names []string
+	}
+
+	input := Title{"a": 0, "b": 1, "c": 2}
+	tests := []struct {
+		name string
+		tr   Title
+		args args
+		want []int
+	}{
+		{
+			"All presented", input, args{[]string{"a", "b", "c"}}, []int{0, 1, 2},
+		},
+		{
+			"Wrong name", input, args{[]string{"out of range"}}, []int{-1},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.tr.index(tt.args.names); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Title.index() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func sum(in [][]int8, c int) int8 {
 	var total int8 = 0
 	for _, v := range in {
@@ -156,10 +213,11 @@ func ExampleProcessor_Sort_ascending() {
 }
 
 func ExampleProcessor_Sort_mixed() {
-	markers := []Marker{{0, Ascending}, {2, Descending}}
+	titles := createTitle([]string{"user", "sub", "scores"})
+	nms := []NamedMarker{{"user", Ascending}, {"scores", Descending}}
 
-	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
-	p.Sort(markers)
+	p := &Processor{titles, numbersAsStrings()}
+	p.Sort(titles.sortingMarkers(nms))
 	p.Print()
 
 	// Output:
