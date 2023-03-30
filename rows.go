@@ -26,16 +26,35 @@ func compare[C comparable](p, q C) int {
 	return 0
 }
 
-func OrderByColumns() *rowsSorter {
-	return &rowsSorter{}
+type Direction int
+
+const (
+	Ascending  = Direction(1)
+	Descending = Direction(-1)
+)
+
+type Marker struct {
+	Index int
+	Order Direction
+}
+
+// OrderByColumns creates a rowsSorter with a slice of Marker.
+// It is anticipated to have all the markers presents in the data
+// to be sorted. If any index is out of range, it will panic:
+// no error handling has be defined yet.
+func OrderByColumns(markers []Marker) *rowsSorter {
+	return &rowsSorter{
+		markers: markers,
+	}
 }
 
 // rowsSorter implements the Sort interface, sorting the string rows by markers (prioritised columns)
 // Currently it will check if any marked columns is int when sorting. If the column is int type, internally
 // it will convert string to int then compare them in the native way.
+// It support sorting in Direction: either Ascending or Descending.
 type rowsSorter struct {
 	rows    [][]string
-	markers []int
+	markers []Marker
 	// a tracker of int columns
 	intColumns map[int]struct{}
 }
@@ -63,7 +82,7 @@ func (byCols *rowsSorter) Less(i, j int) bool {
 
 	// Check first markers, if i equals to j on the marker, continue to the next marker
 	for m := 0; m < nMarker; m++ {
-		marker = byCols.markers[m]
+		marker = byCols.markers[m].Index
 
 		// fmt.Printf("Compare marker %d, check %s < %s\n", marker, rows[i][marker], rows[j][marker])
 		if _, exists := byCols.intColumns[marker]; exists {
@@ -81,6 +100,9 @@ func (byCols *rowsSorter) Less(i, j int) bool {
 			order = compare(byCols.rows[i][marker], byCols.rows[j][marker])
 		}
 
+		// apply ordering
+		order = order * int(byCols.markers[m].Order)
+
 		if order != 0 && m < nMarker-1 {
 			switch order {
 			case -1:
@@ -94,9 +116,8 @@ func (byCols *rowsSorter) Less(i, j int) bool {
 }
 
 // Sort sorts the argument slice according to the less functions passed to OrderedBy.
-func (byCols *rowsSorter) Sort(rows [][]string, markers []int) {
+func (byCols *rowsSorter) Sort(rows [][]string) {
 	byCols.rows = rows
-	byCols.markers = markers
 	byCols.intColumns = make(map[int]struct{})
 
 	sort.Sort(byCols)

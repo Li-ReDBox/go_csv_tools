@@ -7,8 +7,9 @@ import (
 
 func Example_sortRows() {
 	rows := numbersAsStrings()
-	sorter := OrderByColumns()
-	sorter.Sort(rows, []int{0, 2})
+	markers := []Marker{{0, Ascending}, {2, Ascending}}
+	sorter := OrderByColumns(markers)
+	sorter.Sort(rows)
 
 	fmt.Println(rows)
 	// Output:

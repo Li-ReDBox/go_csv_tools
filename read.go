@@ -70,9 +70,9 @@ func (p *Processor) Print() {
 
 }
 
-func (p *Processor) Sort(markers []int) {
-	sorter := OrderByColumns()
-	sorter.Sort(p.rows, markers)
+func (p *Processor) Sort(markers []Marker) {
+	sorter := OrderByColumns(markers)
+	sorter.Sort(p.rows)
 }
 
 func (p *Processor) Export(name string, titles Title, content []string) {

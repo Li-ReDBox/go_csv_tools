@@ -133,9 +133,11 @@ func TestReorder(t *testing.T) {
 	}
 }
 
-func ExampleProcessor_Sort() {
+func ExampleProcessor_Sort_ascending() {
+	markers := []Marker{{0, Ascending}, {2, Ascending}}
+
 	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
-	p.Sort([]int{0, 2})
+	p.Sort(markers)
 	p.Print()
 
 	// Output:
@@ -150,5 +152,27 @@ func ExampleProcessor_Sort() {
 	// 6, [ken Go 200]
 	// 7, [r Go 100]
 	// 8, [r C 150]
+	// 9, [rsc Go 200]
+}
+
+func ExampleProcessor_Sort_mixed() {
+	markers := []Marker{{0, Ascending}, {2, Descending}}
+
+	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
+	p.Sort(markers)
+	p.Print()
+
+	// Output:
+	// Titles:
+	// map[scores:2 sub:1 user:0]
+	// Rows:
+	// 1, [dmr C 100]
+	// 2, [glenda Go 200]
+	// 3, [gri Go 100]
+	// 4, [gri Smalltalk 80]
+	// 5, [ken Go 200]
+	// 6, [ken C 150]
+	// 7, [r C 150]
+	// 8, [r Go 100]
 	// 9, [rsc Go 200]
 }
