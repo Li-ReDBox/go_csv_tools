@@ -6,23 +6,15 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 )
 
 const titleNotFoundPrefix = "csv/TitleNotFound"
 
 // TitleMisMatchError describes an error when a user provided title cannot be found in a given Title.
-type TitleNotFound struct {
-	// Message describes which title is not found
-	Message string
-}
+type TitleNotFound string
 
-func (e *TitleNotFound) Error() string {
-	return titleNotFoundPrefix + ": " + e.Message
-}
-
-func (e *TitleNotFound) Is(err error) bool {
-	return strings.HasPrefix(err.Error(), titleNotFoundPrefix)
+func (e TitleNotFound) Error() string {
+	return titleNotFoundPrefix + ": " + string(e)
 }
 
 type Title map[string]int
@@ -33,7 +25,7 @@ func (t Title) index(names []string) ([]int, error) {
 		if ind, exists := t[n]; exists {
 			indexes[i] = ind
 		} else {
-			return nil, &TitleNotFound{fmt.Sprintf("%s cannot be found", n)}
+			return nil, TitleNotFound(fmt.Sprintf("%s cannot be found", n))
 		}
 	}
 	return indexes, nil
@@ -45,7 +37,7 @@ func (t Title) sortingMarkers(nm []NamedMarker) ([]Marker, error) {
 		if ind, exists := t[m.Name]; exists {
 			markers[i] = Marker{ind, m.Order}
 		} else {
-			return nil, &TitleNotFound{fmt.Sprintf("%s cannot be found", m.Name)}
+			return nil, TitleNotFound(fmt.Sprintf("%s cannot be found", m.Name))
 		}
 	}
 	return markers, nil

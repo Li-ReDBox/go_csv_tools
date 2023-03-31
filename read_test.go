@@ -219,19 +219,30 @@ func ExampleProcessor_Sort_mixed() {
 	// 9, [rsc Go 200]
 }
 
-func TestTitleNotFound_Is(t *testing.T) {
-	var err error = &TitleNotFound{"A title is not found"}
+func TestTitleNotFound_equal(t *testing.T) {
+	err1 := TitleNotFound("n")
+	err2 := TitleNotFound("n")
 
-	if err.Error() != "csv/TitleNotFound: A title is not found" {
+	if err1 != err2 {
+		t.Errorf("Same TitleNotFound error are different: %v != %v", err1, err2)
+	}
+}
+func TestTitleNotFound_Is(t *testing.T) {
+	title := "n"
+	want := "csv/TitleNotFound: " + title
+	var err error = TitleNotFound(title)
+
+	if err.Error() != want {
 		t.Errorf("TitleNotFound message is not well formatted")
 	}
 
-	if !errors.Is(err, &TitleNotFound{}) {
-		t.Errorf("TitleNotFound Is method does not work")
+	if !errors.Is(err, TitleNotFound(title)) {
+		t.Errorf("TitleNotFound cannot use Is to compare.")
 	}
 
-	err = errors.New("This is not TitleNotFound")
-	if errors.Is(err, &TitleNotFound{}) {
-		t.Errorf("TitleNotFound Is method does not work, misclassified %s", err)
+	err = errors.New(want)
+	fmt.Println("Checking ", err)
+	if errors.Is(err, TitleNotFound(title)) {
+		t.Errorf("errors.Is method does not work, misclassified %s as TitleNotFound", err)
 	}
 }
