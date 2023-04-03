@@ -171,6 +171,40 @@ func TestReorder(t *testing.T) {
 	}
 }
 
+func TestProcessor_Swap_notFound(t *testing.T) {
+	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
+	err := p.Swap("first_name", "last_name")
+
+	if err == nil {
+		t.Errorf("Non-existing title should return error but received nil\n")
+	}
+
+	want := TitleNotFound("first_name")
+	if err != want {
+		t.Errorf("Want error as %s, but received %s\n", want, err)
+	}
+}
+
+func ExampleProcessor_Swap() {
+	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
+	p.Swap("sub", "user")
+	p.Print()
+
+	// Output:
+	// Titles:
+	// sub, user, scores
+	// Rows:
+	// 1 Go, gri, 100
+	// 2 C, ken, 150
+	// 3 Go, glenda, 200
+	// 4 Go, rsc, 200
+	// 5 Go, r, 100
+	// 6 Go, ken, 200
+	// 7 C, dmr, 100
+	// 8 C, r, 150
+	// 9 Smalltalk, gri, 80
+}
+
 func ExampleProcessor_Sort_ascending() {
 	markers := []Marker{{0, Ascending}, {2, Ascending}}
 

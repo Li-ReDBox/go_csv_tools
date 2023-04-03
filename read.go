@@ -118,6 +118,22 @@ func (p *Processor) Sort(markers []Marker) {
 	sorter.Sort(p.rows)
 }
 
+func (p *Processor) Swap(i, j string) error {
+	indI, exist := p.titles[i]
+	if !exist {
+		return TitleNotFound(i)
+	}
+	indJ, exist := p.titles[j]
+	if !exist {
+		return TitleNotFound(j)
+	}
+	for _, r := range p.rows {
+		r[indI], r[indJ] = r[indJ], r[indI]
+	}
+	p.titles[i], p.titles[j] = indJ, indI
+	return nil
+}
+
 func (p *Processor) Export(name string, titles Title, content []string) {
 
 }
