@@ -28,16 +28,16 @@ func (t Title) names() []string {
 	return ns
 }
 
-func (t Title) index(names []string) ([]int, error) {
-	indexes := make([]int, len(names))
+func (t Title) indexes(names []string) ([]int, error) {
+	inds := make([]int, len(names))
 	for i, n := range names {
 		if ind, exists := t[n]; exists {
-			indexes[i] = ind
+			inds[i] = ind
 		} else {
 			return nil, TitleNotFound(fmt.Sprintf("%s cannot be found", n))
 		}
 	}
-	return indexes, nil
+	return inds, nil
 }
 
 func (t Title) sortingMarkers(nm []NamedMarker) ([]Marker, error) {

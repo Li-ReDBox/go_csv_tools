@@ -120,13 +120,13 @@ func TestTitle_index(t *testing.T) {
 
 	t.Run("All presented", func(t *testing.T) {
 		want := []int{0, 1, 2}
-		got, err := input.index([]string{"a", "b", "c"})
+		got, err := input.indexes([]string{"a", "b", "c"})
 		if !(err == nil && reflect.DeepEqual(got, want)) {
 			t.Errorf("Title.index() = %v, want %v\n", got, want)
 		}
 	})
 	t.Run("Wrong name", func(t *testing.T) {
-		got, err := input.index([]string{"out of range"})
+		got, err := input.indexes([]string{"out of range"})
 		if err != nil && got != nil {
 			t.Errorf("Title.index() should has a non-nil error, but it is %s, markers should be nil, but %v", err, got)
 		}
