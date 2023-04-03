@@ -180,17 +180,17 @@ func ExampleProcessor_Sort_ascending() {
 
 	// Output:
 	// Titles:
-	// map[scores:2 sub:1 user:0]
+	// user, sub, scores
 	// Rows:
-	// 1, [dmr C 100]
-	// 2, [glenda Go 200]
-	// 3, [gri Smalltalk 80]
-	// 4, [gri Go 100]
-	// 5, [ken C 150]
-	// 6, [ken Go 200]
-	// 7, [r Go 100]
-	// 8, [r C 150]
-	// 9, [rsc Go 200]
+	// 1 dmr, C, 100
+	// 2 glenda, Go, 200
+	// 3 gri, Smalltalk, 80
+	// 4 gri, Go, 100
+	// 5 ken, C, 150
+	// 6 ken, Go, 200
+	// 7 r, Go, 100
+	// 8 r, C, 150
+	// 9 rsc, Go, 200
 }
 
 func ExampleProcessor_Sort_mixed() {
@@ -206,17 +206,17 @@ func ExampleProcessor_Sort_mixed() {
 
 	// Output:
 	// Titles:
-	// map[scores:2 sub:1 user:0]
+	// user, sub, scores
 	// Rows:
-	// 1, [dmr C 100]
-	// 2, [glenda Go 200]
-	// 3, [gri Go 100]
-	// 4, [gri Smalltalk 80]
-	// 5, [ken Go 200]
-	// 6, [ken C 150]
-	// 7, [r C 150]
-	// 8, [r Go 100]
-	// 9, [rsc Go 200]
+	// 1 dmr, C, 100
+	// 2 glenda, Go, 200
+	// 3 gri, Go, 100
+	// 4 gri, Smalltalk, 80
+	// 5 ken, Go, 200
+	// 6 ken, C, 150
+	// 7 r, C, 150
+	// 8 r, Go, 100
+	// 9 rsc, Go, 200
 }
 
 func TestTitleNotFound_equal(t *testing.T) {

@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 )
 
 const titleNotFoundPrefix = "csv/TitleNotFound"
@@ -18,6 +19,14 @@ func (e TitleNotFound) Error() string {
 }
 
 type Title map[string]int
+
+func (t Title) names() []string {
+	ns := make([]string, len(t))
+	for k, n := range t {
+		ns[n] = k
+	}
+	return ns
+}
 
 func (t Title) index(names []string) ([]int, error) {
 	indexes := make([]int, len(names))
@@ -93,11 +102,12 @@ func (p *Processor) Size() (int, int) {
 
 func (p *Processor) Print() {
 	fmt.Println("Titles:")
-	fmt.Printf("%v\n", p.titles)
+	// Keys returns a slice without a determined order
+	fmt.Println(strings.Join(p.titles.names(), ", "))
 
 	fmt.Println("Rows:")
 	for i, r := range p.rows {
-		fmt.Printf("%d, %v\n", i+1, r)
+		fmt.Println(i+1, strings.Join(r, ", "))
 	}
 	fmt.Println()
 
