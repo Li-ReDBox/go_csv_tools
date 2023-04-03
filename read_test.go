@@ -253,6 +253,52 @@ func ExampleProcessor_Sort_mixed() {
 	// 9 rsc, Go, 200
 }
 
+func ExampleProcessor_Extract() {
+	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
+	sub, _ := p.Extract([]string{"sub", "user"})
+
+	for i, row := range sub {
+		fmt.Println(i+1, strings.Join(row, ", "))
+	}
+
+	// Output:
+	// 1 Go, gri
+	// 2 C, ken
+	// 3 Go, glenda
+	// 4 Go, rsc
+	// 5 Go, r
+	// 6 Go, ken
+	// 7 C, dmr
+	// 8 C, r
+	// 9 Smalltalk, gri
+}
+
+func ExampleProcessor_Convert() {
+	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
+	c, err := p.Convert([]string{"scores", "user"})
+
+	if err == nil {
+		// mapping new titles into a slice of sorting markers
+		markers := []Marker{{0, Descending}, {1, Ascending}}
+		c.Sort(markers)
+		c.Print()
+	}
+
+	// Output:
+	// Titles:
+	// scores, user
+	// Rows:
+	// 1 200, glenda
+	// 2 200, ken
+	// 3 200, rsc
+	// 4 150, ken
+	// 5 150, r
+	// 6 100, dmr
+	// 7 100, gri
+	// 8 100, r
+	// 9 80, gri
+}
+
 func TestTitleNotFound_equal(t *testing.T) {
 	err1 := TitleNotFound("n")
 	err2 := TitleNotFound("n")

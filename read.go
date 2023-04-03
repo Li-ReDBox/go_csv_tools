@@ -134,8 +134,36 @@ func (p *Processor) Swap(i, j string) error {
 	return nil
 }
 
-func (p *Processor) Export(name string, titles Title, content []string) {
+// Extract gets a sub set of current data by a given slice of title names
+func (p *Processor) Extract(names []string) ([][]string, error) {
+	c := len(names)
+	indexes := make([]int, c)
+	var ind int
+	var exists bool
+	for i := 0; i < c; i++ {
+		if ind, exists = p.titles[names[i]]; !exists {
+			return nil, TitleNotFound(names[i])
+		}
+		indexes[i] = ind
+	}
+	rows := len(p.rows)
+	extracted := make([][]string, rows)
+	for r := 0; r < rows; r++ {
+		extracted[r] = make([]string, c)
+		for i := 0; i < c; i++ {
+			extracted[r][i] = p.rows[r][indexes[i]]
+		}
+	}
+	return extracted, nil
+}
 
+// Convert creates a new Processor with a sub set of current data by a given slice of title names
+func (p *Processor) Convert(names []string) (*Processor, error) {
+	extracted, err := p.Extract(names)
+	if err != nil {
+		return nil, err
+	}
+	return &Processor{createTitle(names), extracted}, nil
 }
 
 // createRecords creates a slice of map with string keys and values
