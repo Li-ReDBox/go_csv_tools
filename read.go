@@ -40,6 +40,7 @@ func (t Title) indexes(names []string) ([]int, error) {
 	return inds, nil
 }
 
+// sortingMarkers creates a slice of Marker from a give slice of NamedMarker
 func (t Title) sortingMarkers(nm []NamedMarker) ([]Marker, error) {
 	markers := make([]Marker, len(nm))
 	for i, m := range nm {

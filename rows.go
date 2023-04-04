@@ -33,11 +33,15 @@ const (
 	Descending = Direction(-1)
 )
 
+// Marker defines a numbered sorting order. It can be applied to a data set of [][]string for sorting.
 type Marker struct {
 	Index int
 	Order Direction
 }
 
+// NamedMarker defines named sorting order. It cannot be applied to a data set of [][]string for sorting.
+// It needs to be mapped Marker first. Title.sortingMarkers provides a such mapping. Because it needs a mapping
+// step, they are/can be validated against dataset, which is safer compared to using Marker.
 type NamedMarker struct {
 	Name  string
 	Order Direction
