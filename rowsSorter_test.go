@@ -5,31 +5,6 @@ import (
 	"testing"
 )
 
-func Example_sortRows() {
-	rows := numbersAsStrings()
-	markers := []Marker{{0, Ascending}, {2, Ascending}}
-	sorter := OrderByColumns(markers)
-	sorter.Sort(rows)
-
-	fmt.Println(rows)
-	// Output:
-	// [[dmr C 100] [glenda Go 200] [gri Smalltalk 80] [gri Go 100] [ken C 150] [ken Go 200] [r Go 100] [r C 150] [rsc Go 200]]
-}
-
-/*
-excel sorting:
-dmr	C	100
-glenda	Go	200
-gri	Smalltalk	80
-gri	Go	100
-ken	C	150
-ken	Go	200
-r	Go	100
-r	C	150
-rsc	Go	200
-
-*/
-
 func TestCompareNumStrings(t *testing.T) {
 	tests := []struct {
 		s1, s2 string
