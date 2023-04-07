@@ -9,48 +9,26 @@ import (
 	"strings"
 )
 
-const titleNotFoundPrefix = "csv/TitleNotFound"
+// NewProcessor opens a csv file named as fileName and returns *Processor
+// when there is no error otherwise it logs error and exits
+func NewProcessor(fileName string) *Processor {
+	fmt.Println("We will be process csv = ", fileName)
 
-// TitleMisMatchError describes an error when a user provided title cannot be found in a given Title.
-type TitleNotFound string
+	file, err := os.Open(fileName)
 
-func (e TitleNotFound) Error() string {
-	return titleNotFoundPrefix + ": " + string(e)
-}
-
-type Title map[string]int
-
-func (t Title) names() []string {
-	ns := make([]string, len(t))
-	for k, n := range t {
-		ns[n] = k
+	if err != nil {
+		log.Fatal(err)
 	}
-	return ns
-}
 
-func (t Title) indexes(names []string) ([]int, error) {
-	inds := make([]int, len(names))
-	for i, n := range names {
-		if ind, exists := t[n]; exists {
-			inds[i] = ind
-		} else {
-			return nil, TitleNotFound(fmt.Sprintf("%s cannot be found", n))
-		}
-	}
-	return inds, nil
-}
+	records := read(file)
 
-// sortingMarkers creates a slice of Marker from a give slice of NamedMarker
-func (t Title) sortingMarkers(nm []NamedMarker) ([]Marker, error) {
-	markers := make([]Marker, len(nm))
-	for i, m := range nm {
-		if ind, exists := t[m.Name]; exists {
-			markers[i] = Marker{ind, m.Order}
-		} else {
-			return nil, TitleNotFound(fmt.Sprintf("%s cannot be found", m.Name))
-		}
+	p := &Processor{createTitle(records[0][:]), records[1:][:]}
+
+	if err := file.Close(); err != nil {
+		log.Fatal(err)
 	}
-	return markers, nil
+
+	return p
 }
 
 type Processor struct {
@@ -180,36 +158,4 @@ func createRecords(lines [][]string) []map[string]string {
 	}
 
 	return records
-}
-
-// createTitle returns a Title from the input of a slice of string.
-// The value of each entry is the zero-base column number from a csv file.
-func createTitle(names []string) Title {
-	t := make(Title)
-	for i, n := range names {
-		t[n] = i
-	}
-	return t
-}
-
-// NewProcessor opens a csv file named as fileName and returns *Processor
-// when there is no error otherwise it logs error and exits
-func NewProcessor(fileName string) *Processor {
-	fmt.Println("We will be process csv = ", fileName)
-
-	file, err := os.Open(fileName)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	records := read(file)
-
-	p := &Processor{createTitle(records[0][:]), records[1:][:]}
-
-	if err := file.Close(); err != nil {
-		log.Fatal(err)
-	}
-
-	return p
 }
