@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"funmech.com/csv"
+	funtool "funmech.com/csv"
 )
 
 var csvFile = flag.String("csv", "", "csv file to be processed")
@@ -31,9 +31,19 @@ func main() {
 
 	fmt.Println("We will be process csv = ", *csvFile)
 
-	p := csv.NewProcessor(*csvFile)
+	p := funtool.NewProcessor(*csvFile)
 
 	fmt.Printf("Loaded data from %s, its has size of %v\n", *csvFile, fmt.Sprint(p.Size()))
 
 	p.Print()
+
+	f, err := os.Create("demo.csv")
+	if err != nil {
+		fmt.Println("Cannot create demo.csv, details:", err)
+		os.Exit(1)
+	}
+	err = p.Write(f)
+	if err != nil {
+		fmt.Println("Failed to save to a new file: demo.csv. error: ", err)
+	}
 }
