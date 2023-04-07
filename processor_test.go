@@ -212,3 +212,27 @@ func TestTitleNotFound_Is(t *testing.T) {
 		t.Errorf("errors.Is method does not work, misclassified %s as TitleNotFound", err)
 	}
 }
+
+func TestProcessor_Write(t *testing.T) {
+	p := &Processor{
+		rows: numbersAsStrings()}
+	o := `gri,Go,100
+ken,C,150
+glenda,Go,200
+rsc,Go,200
+r,Go,100
+ken,Go,200
+dmr,C,100
+r,C,150
+gri,Smalltalk,80
+`
+	var w strings.Builder
+	err := p.Write(&w)
+	if err != nil {
+		t.Errorf("Wanted err to be nil, but it is %s\n", err)
+	}
+
+	if w.String() != o {
+		t.Errorf("Write method generated un expected content. wanted:\n%s\n but got:\n%s\n", o, w.String())
+	}
+}

@@ -2,6 +2,7 @@ package csv
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -143,6 +144,23 @@ func (p *Processor) Convert(names []string) (*Processor, error) {
 		return nil, err
 	}
 	return &Processor{createTitle(names), extracted}, nil
+}
+
+// Write the data to the Writer w
+func (p *Processor) Write(w io.Writer) error {
+	var tErr, lErr, fErr error
+	writer := csv.NewWriter(w)
+	names := p.titles.names()
+	if len(names) > 0 {
+		tErr = writer.Write(names)
+	}
+
+	if tErr == nil {
+		lErr = writer.WriteAll(p.rows)
+
+		fErr = writer.Error()
+	}
+	return errors.Join(tErr, lErr, fErr)
 }
 
 // createRecords creates a slice of map with string keys and values
