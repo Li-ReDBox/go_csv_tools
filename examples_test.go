@@ -120,39 +120,60 @@ func ExampleProcessor_Convert() {
 }
 
 // ExampleProcessor_split shows how to split a sorted dataset
-func ExampleProcessor_split() {
+func ExampleProcessor_Split() {
 	titles := createTitle([]string{"user", "sub", "scores"})
 	p := &Processor{titles, numbersAsStrings()}
 
-	inds, _ := titles.indexes([]string{"user", "scores"})
-	markers := []Marker{{inds[1], Ascending}, {inds[0], Ascending}}
+	names := []string{"sub"}
+	inds, _ := titles.indexes(names)
+	markers := []Marker{{inds[0], Descending}}
 	p.Sort(markers)
+	fmt.Println("Source:")
+	p.Print()
 
-	// say we want to split by "scores": inds[1]
-
-	current := ""
-	for _, r := range p.rows {
-		if r[inds[1]] != current {
-			current = r[inds[1]]
-			fmt.Println("Section", current)
-		}
-		fmt.Println(r)
+	fmt.Println("Split results:")
+	np, _ := p.Split(names)
+	for _, s := range np {
+		s.Print()
 	}
 
 	// Output:
-	// Section 80
-	// [gri Smalltalk 80]
-	// Section 100
-	// [dmr C 100]
-	// [gri Go 100]
-	// [r Go 100]
-	// Section 150
-	// [ken C 150]
-	// [r C 150]
-	// Section 200
-	// [glenda Go 200]
-	// [ken Go 200]
-	// [rsc Go 200]
+	// Source:
+	// Titles:
+	// user, sub, scores
+	// Rows:
+	// 1 gri, Smalltalk, 80
+	// 2 gri, Go, 100
+	// 3 glenda, Go, 200
+	// 4 rsc, Go, 200
+	// 5 r, Go, 100
+	// 6 ken, Go, 200
+	// 7 ken, C, 150
+	// 8 dmr, C, 100
+	// 9 r, C, 150
+	//
+	// Split results:
+	// Titles:
+	// user, sub, scores
+	// Rows:
+	// 1 gri, Smalltalk, 80
+	//
+	// Titles:
+	// user, sub, scores
+	// Rows:
+	// 1 gri, Go, 100
+	// 2 glenda, Go, 200
+	// 3 rsc, Go, 200
+	// 4 r, Go, 100
+	// 5 ken, Go, 200
+	//
+	// Titles:
+	// user, sub, scores
+	// Rows:
+	// 1 ken, C, 150
+	// 2 dmr, C, 100
+	// 3 r, C, 150
+	//
 }
 
 // Examples for rows

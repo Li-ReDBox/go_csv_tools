@@ -236,3 +236,37 @@ gri,Smalltalk,80
 		t.Errorf("Write method generated un expected content. wanted:\n%s\n but got:\n%s\n", o, w.String())
 	}
 }
+
+func TestProcessor_Split(t *testing.T) {
+	titles := createTitle([]string{"language", "level", "value"})
+
+	source := [][]string{
+		{"C", "L1", "1"},
+		{"C", "L2", "2"},
+		{"C", "L1", "3"},
+		{"C", "L2", "4"},
+		{"C", "L1", "5"},
+		{"JS", "L2", "6"},
+		{"JS", "L1", "7"},
+		{"JS", "L2", "8"},
+		{"JS", "L1", "9"},
+		{"Go", "L1", "10"},
+		{"Go", "L1", "11"},
+		{"Smalltalk", "L1", "12"},
+	}
+	p := &Processor{titles, source}
+
+	names := []string{"level", "language"}
+	inds, _ := titles.indexes(names)
+	markers := []Marker{{inds[0], Descending}, {inds[1], Ascending}}
+	p.Sort(markers)
+
+	np, _ := p.Split(names)
+	if len(np) != 6 {
+		t.Errorf("Wanted to get 6 new Processors, but got %d", len(np))
+		p.Print()
+		for _, n := range np {
+			n.Print()
+		}
+	}
+}

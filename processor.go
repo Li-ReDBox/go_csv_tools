@@ -146,6 +146,43 @@ func (p *Processor) Convert(names []string) (*Processor, error) {
 	return &Processor{createTitle(names), extracted}, nil
 }
 
+// Split uses title names to group rows and creates a slice of new Processor
+// The source Processor should have been sorted, the order of names is significant.
+func (p *Processor) Split(names []string) ([]*Processor, error) {
+	var np []*Processor
+
+	inds, _ := p.titles.indexes(names)
+	checkers := len(names)
+	current := make([]string, checkers)
+
+	update := func(r int) {
+		for i, j := range inds {
+			current[i] = p.rows[r][j]
+		}
+	}
+
+	update(0)
+	start := 0
+	crows := len(p.rows)
+
+	for r := 1; r < crows; r++ {
+		for i := 0; i < checkers; i++ {
+			// any checker is different, it means a new Processor
+			if p.rows[r][inds[i]] != current[i] {
+				np = append(np, &Processor{p.titles, p.rows[start:r]})
+				update(r)
+				start = r
+				break
+			}
+		}
+	}
+	if start < len(p.rows) {
+		np = append(np, &Processor{p.titles, p.rows[start:]})
+	}
+
+	return np, nil
+}
+
 // Write the data to the Writer w
 func (p *Processor) Write(w io.Writer) error {
 	var tErr, lErr, fErr error
