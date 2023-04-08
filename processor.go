@@ -116,22 +116,19 @@ func (p *Processor) Swap(i, j string) error {
 
 // Extract gets a sub set of current data by a given slice of title names
 func (p *Processor) Extract(names []string) ([][]string, error) {
-	c := len(names)
-	indexes := make([]int, c)
-	var ind int
-	var exists bool
-	for i := 0; i < c; i++ {
-		if ind, exists = p.titles[names[i]]; !exists {
-			return nil, TitleNotFound(names[i])
-		}
-		indexes[i] = ind
+	inds, err := p.titles.indexes(names)
+	if err != nil {
+		return nil, err
 	}
+
+	c := len(names)
 	rows := len(p.rows)
 	extracted := make([][]string, rows)
+
 	for r := 0; r < rows; r++ {
 		extracted[r] = make([]string, c)
 		for i := 0; i < c; i++ {
-			extracted[r][i] = p.rows[r][indexes[i]]
+			extracted[r][i] = p.rows[r][inds[i]]
 		}
 	}
 	return extracted, nil
@@ -149,11 +146,14 @@ func (p *Processor) Convert(names []string) (*Processor, error) {
 // Split uses title names to group rows and creates a slice of new Processor
 // The source Processor should have been sorted, the order of names is significant.
 func (p *Processor) Split(names []string) ([]*Processor, error) {
-	var np []*Processor
+	inds, err := p.titles.indexes(names)
+	if err != nil {
+		return nil, err
+	}
 
-	inds, _ := p.titles.indexes(names)
-	checkers := len(names)
-	current := make([]string, checkers)
+	var np []*Processor
+	c := len(names)
+	current := make([]string, c)
 
 	update := func(r int) {
 		for i, j := range inds {
@@ -166,7 +166,7 @@ func (p *Processor) Split(names []string) ([]*Processor, error) {
 	crows := len(p.rows)
 
 	for r := 1; r < crows; r++ {
-		for i := 0; i < checkers; i++ {
+		for i := 0; i < c; i++ {
 			// any checker is different, it means a new Processor
 			if p.rows[r][inds[i]] != current[i] {
 				np = append(np, &Processor{p.titles, p.rows[start:r]})
