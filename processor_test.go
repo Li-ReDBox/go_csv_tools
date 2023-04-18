@@ -297,10 +297,7 @@ func TestProcessor_Remove(t *testing.T) {
 	}
 
 	smalltalk := func(r []string) bool {
-		if r[0] == "Smalltalk" {
-			return true
-		}
-		return false
+		return r[0] == "Smalltalk"
 	}
 
 	p.Remove(cl2, smalltalk)
