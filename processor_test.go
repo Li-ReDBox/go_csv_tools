@@ -270,3 +270,38 @@ func TestProcessor_Split(t *testing.T) {
 		}
 	}
 }
+
+func TestProcessor_Remove(t *testing.T) {
+	source := [][]string{
+		{"C", "L1", "1"},
+		{"C", "L2", "2"},
+		{"C", "L1", "3"},
+		{"C", "L2", "4"},
+		{"C", "L1", "5"},
+		{"JS", "L2", "6"},
+		{"JS", "L1", "7"},
+		{"JS", "L2", "8"},
+		{"JS", "L1", "9"},
+		{"Go", "L1", "10"},
+		{"Go", "L1", "11"},
+		{"Smalltalk", "L1", "12"},
+	}
+
+	p := &Processor{rows: source}
+
+	cl2 := func(r []string) bool {
+		if r[0] == "C" && r[1] == "L2" {
+			return true
+		}
+		return false
+	}
+
+	smalltalk := func(r []string) bool {
+		if r[0] == "Smalltalk" {
+			return true
+		}
+		return false
+	}
+
+	p.Remove(cl2, smalltalk)
+}

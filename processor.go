@@ -200,6 +200,31 @@ func (p *Processor) Write(w io.Writer) error {
 	return errors.Join(tErr, lErr, fErr)
 }
 
+type Isfunc func(s []string) bool
+
+func (p *Processor) Remove(is ...Isfunc) {
+	var (
+		i   int
+		can bool
+	)
+
+	temp := p.rows[:0]
+	s := len(is)
+	for r := 0; r < len(p.rows); r++ {
+		can = false
+		for i = 0; i < s; i++ {
+			if is[i](p.rows[r]) {
+				can = true
+				break
+			}
+		}
+		if can {
+			temp = append(temp, p.rows[r])
+		}
+	}
+	p.rows = temp
+}
+
 // createRecords creates a slice of map with string keys and values
 func createRecords(lines [][]string) []map[string]string {
 	var records []map[string]string
