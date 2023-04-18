@@ -176,6 +176,22 @@ func ExampleProcessor_Split() {
 	//
 }
 
+func ExampleProcessor_Unique() {
+	dup := append(basicRows(), basicRows()...)
+	p := Processor{rows: dup}
+	np := p.Unique()
+	np.Print()
+
+	// Output:
+	// Titles:
+	//
+	// Rows:
+	// 1 first_name, last_name, username
+	// 2 Rob, Pike, rob
+	// 3 Ken, Thompson, ken
+	// 4 Robert, Griesemer, gri
+}
+
 // Examples for rows
 func Example_sortRows() {
 	rows := numbersAsStrings()

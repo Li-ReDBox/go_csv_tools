@@ -305,3 +305,43 @@ func TestProcessor_Remove(t *testing.T) {
 
 	p.Remove(cl2, smalltalk)
 }
+
+func Test_md5hash(t *testing.T) {
+	o := []string{"These pretzels are making me thirsty."}
+
+	if o[0] != strings.Join(o, "") {
+		t.Errorf("o cannot be joined to represent o[0]: %s\n", strings.Join(o, ""))
+	}
+
+	want := "b0804ec967f48520697662a204f5fe72"
+
+	r := md5hash(o)
+
+	if r != want {
+		t.Errorf("mdhash failed. wanted %s, but got %s\n", want, r)
+	}
+}
+
+func TestProcessor_Unique(t *testing.T) {
+	source := [][]string{
+		{"C", "L1", "1"},
+		{"JS", "L2", "6"},
+		{"Go", "L1", "10"},
+		{"Smalltalk", "L1", "12"},
+		{"C", "L1", "1"},
+		{"JS", "L2", "6"},
+		{"Go", "L1", "10"},
+		{"Smalltalk", "L1", "12"},
+		{"C", "L1", "1"},
+		{"JS", "L2", "6"},
+		{"Go", "L1", "10"},
+		{"Smalltalk", "L1", "12"},
+	}
+
+	p := &Processor{rows: source}
+	np := p.Unique()
+
+	if len(np.rows) != 4 {
+		t.Errorf("The rows should have 4 unique rows, but np = %d\n", len(np.rows))
+	}
+}

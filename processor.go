@@ -1,6 +1,7 @@
 package csv
 
 import (
+	"crypto/md5"
 	"encoding/csv"
 	"errors"
 	"fmt"
@@ -223,6 +224,29 @@ func (p *Processor) Remove(is ...Isfunc) {
 		}
 	}
 	p.rows = temp
+}
+
+func md5hash(o []string) string {
+	sum := md5.Sum([]byte(strings.Join(o, "")))
+	return fmt.Sprintf("%x", sum)
+}
+
+// Unique creates a new Processor from the current one by removing all the duplicates
+func (p *Processor) Unique() *Processor {
+	markers := make(map[string]struct{})
+
+	nRows := len(p.rows)
+	unique := make([][]string, 0, nRows)
+
+	for i := 0; i < nRows; i++ {
+		h := md5hash(p.rows[i])
+		if _, ok := markers[h]; !ok {
+			unique = append(unique, p.rows[i])
+			markers[h] = struct{}{}
+		}
+	}
+
+	return &Processor{p.titles, unique}
 }
 
 // createRecords creates a slice of map with string keys and values
