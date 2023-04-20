@@ -341,4 +341,9 @@ func TestProcessor_Unique(t *testing.T) {
 	if len(np.rows) != 4 {
 		t.Errorf("The rows should have 4 unique rows, but np = %d\n", len(np.rows))
 	}
+
+	np.rows[0][0] = "corrupted"
+	if np.rows[0][0] == p.rows[0][0] {
+		t.Error("Should have copied values and created two completely separated rows, but [0][0] are equal.")
+	}
 }

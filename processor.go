@@ -78,7 +78,14 @@ func (p *Processor) Size() (int, int) {
 		return 0, 0
 	}
 
-	return len(p.titles), len(p.rows)
+	n := len(p.titles)
+
+	// If titles is not set, get it from the first row, assume rows are equal
+	if n == 0 {
+		n = len(p.rows[0])
+	}
+
+	return n, len(p.rows)
 }
 
 func (p *Processor) Print() {
@@ -115,7 +122,7 @@ func (p *Processor) Swap(i, j string) error {
 	return nil
 }
 
-// Extract gets a sub set of current data by a given slice of title names
+// Extract gets a sub set of current data by a given slice of title names, the order of columns can be changed.
 func (p *Processor) Extract(names []string) ([][]string, error) {
 	inds, err := p.titles.indexes(names)
 	if err != nil {
@@ -135,7 +142,7 @@ func (p *Processor) Extract(names []string) ([][]string, error) {
 	return extracted, nil
 }
 
-// Convert creates a new Processor with a sub set of current data by a given slice of title names
+// Convert creates a new Processor with a sub set of current data by a given slice of title names. The order of columns can be changed.
 func (p *Processor) Convert(names []string) (*Processor, error) {
 	extracted, err := p.Extract(names)
 	if err != nil {
@@ -235,13 +242,15 @@ func md5hash(o []string) string {
 func (p *Processor) Unique() *Processor {
 	markers := make(map[string]struct{})
 
-	nRows := len(p.rows)
+	nCols, nRows := p.Size()
 	unique := make([][]string, 0, nRows)
 
 	for i := 0; i < nRows; i++ {
 		h := md5hash(p.rows[i])
 		if _, ok := markers[h]; !ok {
-			unique = append(unique, p.rows[i])
+			c := make([]string, nCols)
+			copy(c, p.rows[i])
+			unique = append(unique, c)
 			markers[h] = struct{}{}
 		}
 	}
