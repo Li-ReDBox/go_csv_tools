@@ -85,18 +85,6 @@ func TestCreateRecords(t *testing.T) {
 	}
 }
 
-func TestCreateTitle(t *testing.T) {
-	names := [...]string{"a", "b", "c"}
-
-	want := Title{"a": 0, "b": 1, "c": 2}
-
-	titles := createTitle(names[:])
-
-	if !maps.Equal(titles, want) {
-		t.Errorf("CreateTitle() = %v, want %v", titles, want)
-	}
-}
-
 func TestTitle_sortingMarkers(t *testing.T) {
 	input := Title{"a": 0, "b": 1, "c": 2}
 

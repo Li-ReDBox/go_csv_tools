@@ -48,6 +48,18 @@ func (t Title) sortingMarkers(nm []NamedMarker) ([]Marker, error) {
 	return markers, nil
 }
 
+func (t Title) clone() Title {
+	if t == nil {
+		return nil
+	}
+
+	n := make(Title)
+	for k, v := range t {
+		n[k] = v
+	}
+	return n
+}
+
 // createTitle returns a Title from the input of a slice of string.
 // The value of each entry is the zero-base column number from a csv file.
 func createTitle(names []string) Title {
