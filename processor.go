@@ -123,6 +123,7 @@ func (p *Processor) Swap(i, j string) error {
 }
 
 // Extract gets a sub set of current data by a given slice of title names, the order of columns can be changed.
+// FIXME: new Processor is linked to the source
 func (p *Processor) Extract(names []string) ([][]string, error) {
 	inds, err := p.titles.indexes(names)
 	if err != nil {
@@ -143,6 +144,7 @@ func (p *Processor) Extract(names []string) ([][]string, error) {
 }
 
 // Convert creates a new Processor with a sub set of current data by a given slice of title names. The order of columns can be changed.
+// The new Processor is linked to the source, so it is a view.
 func (p *Processor) Convert(names []string) (*Processor, error) {
 	extracted, err := p.Extract(names)
 	if err != nil {
@@ -153,6 +155,7 @@ func (p *Processor) Convert(names []string) (*Processor, error) {
 
 // Split uses title names to group rows and creates a slice of new Processor
 // The source Processor should have been sorted, the order of names is significant.
+// The new Processor is linked to the source, so it is a view.
 func (p *Processor) Split(names []string) ([]*Processor, error) {
 	inds, err := p.titles.indexes(names)
 	if err != nil {
@@ -210,6 +213,8 @@ func (p *Processor) Write(w io.Writer) error {
 
 type Isfunc func(s []string) bool
 
+// Remove uses condition functions to check rows and remove them if conditions are met.
+// This a in place procedure.
 func (p *Processor) Remove(is ...Isfunc) {
 	var (
 		i   int
@@ -256,6 +261,18 @@ func (p *Processor) Unique() *Processor {
 	}
 
 	return &Processor{p.titles, unique}
+}
+
+// Clone makes a complete new Processor from the current one, so both can be processed independently.
+func (p *Processor) Clone() *Processor {
+	nCols, nRows := p.Size()
+	r := make([][]string, 0, nRows)
+	for i := 0; i < nRows; i++ {
+		c := make([]string, nCols)
+		copy(c, p.rows[i])
+		r = append(r, c)
+	}
+	return &Processor{p.titles.clone(), r}
 }
 
 // createRecords creates a slice of map with string keys and values

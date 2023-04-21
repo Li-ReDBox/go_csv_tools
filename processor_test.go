@@ -335,3 +335,36 @@ func TestProcessor_Unique(t *testing.T) {
 		t.Error("Should have copied values and created two completely separated rows, but [0][0] are equal.")
 	}
 }
+
+func TestProcessorClone(t *testing.T) {
+	data := basicRows()
+	source := &Processor{
+		createTitle(data[0]),
+		data[1:],
+	}
+
+	copy := source.Clone()
+
+	if copy == source {
+		t.Errorf("Clone did not produce a new Processor, want = %v, got = %v\n", source, copy)
+	}
+
+	if !maps.Equal(source.titles, copy.titles) {
+		t.Errorf("Clone failed to reproduce titles: want = %v, got = %v\n", source.titles, copy.titles)
+	}
+
+	// This is a silly test
+	copy.titles["extra"] = len(source.titles) + 1
+
+	if maps.Equal(source.titles, copy.titles) {
+		t.Errorf("Clone failed to create a new copy: want = %v != %v\n", source.titles, copy.titles)
+	}
+
+	nRows := len(source.rows)
+	for i := 0; i < nRows; i++ {
+		copy.rows[i][0] = ""
+		if copy.rows[i][0] == source.rows[i][0] {
+			t.Error("Rows are not fully cloned: changed copy went to source.")
+		}
+	}
+}
