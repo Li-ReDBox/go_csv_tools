@@ -34,6 +34,7 @@ func NewProcessor(fileName string) *Processor {
 }
 
 type Processor struct {
+	// titles is optional
 	titles Title
 	rows   [][]string
 }
@@ -73,19 +74,13 @@ func read(source io.Reader) [][]string {
 	return records
 }
 
+// Size returns the number of columns and the number of rows of matrix rows in that order.
 func (p *Processor) Size() (int, int) {
 	if p == nil {
 		return 0, 0
 	}
 
-	n := len(p.titles)
-
-	// If titles is not set, get it from the first row, assume rows are equal
-	if n == 0 {
-		n = len(p.rows[0])
-	}
-
-	return n, len(p.rows)
+	return len(p.rows[0]), len(p.rows)
 }
 
 func (p *Processor) Print() {
