@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -160,7 +161,7 @@ func TestReorder(t *testing.T) {
 }
 
 func TestProcessor_Swap_notFound(t *testing.T) {
-	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
+	p := &Processor{rows: numbersAsStrings()}
 	err := p.Swap("first_name", "last_name")
 
 	if err == nil {
@@ -259,12 +260,14 @@ func TestProcessor_Split(t *testing.T) {
 	}
 }
 
-func TestProcessor_Remove(t *testing.T) {
+func TestProcessor_Filter(t *testing.T) {
+	var current, after runtime.MemStats
+
 	source := [][]string{
 		{"C", "L1", "1"},
-		{"C", "L2", "2"},
+		{"C", "L2", "2"}, // cl2
 		{"C", "L1", "3"},
-		{"C", "L2", "4"},
+		{"C", "L2", "4"}, // cl2
 		{"C", "L1", "5"},
 		{"JS", "L2", "6"},
 		{"JS", "L1", "7"},
@@ -272,7 +275,7 @@ func TestProcessor_Remove(t *testing.T) {
 		{"JS", "L1", "9"},
 		{"Go", "L1", "10"},
 		{"Go", "L1", "11"},
-		{"Smalltalk", "L1", "12"},
+		{"Smalltalk", "L1", "12"}, // smalltalk
 	}
 
 	p := &Processor{rows: source}
@@ -288,7 +291,21 @@ func TestProcessor_Remove(t *testing.T) {
 		return r[0] == "Smalltalk"
 	}
 
-	p.Remove(cl2, smalltalk)
+	runtime.ReadMemStats(&current)
+	p.Filter(cl2, smalltalk)
+
+	want, nRows := 3, len(p.rows)
+	if nRows != want {
+		t.Errorf("Expecting rows = %d, but got %d\n", want, nRows)
+	}
+
+	runtime.GC()
+	runtime.ReadMemStats(&after)
+	// fmt.Printf("Before:\n %#v\n, After:\n %#v\n", current, after)
+	fmt.Printf("Before:\n alloc=%v, heapalloc=%v, HeapIdle=%v, HeapReleased=%v, HeapObjects=%v, NumGC=%v\n",
+		current.Alloc, current.HeapAlloc, current.HeapIdle, current.HeapReleased, current.HeapObjects, current.NumGC)
+	fmt.Printf("Before:\n alloc=%v, heapalloc=%v, HeapIdle=%v, HeapReleased=%v, HeapObjects=%v, NumGC=%v\n",
+		after.Alloc, after.HeapAlloc, after.HeapIdle, after.HeapReleased, after.HeapObjects, after.NumGC)
 }
 
 func Test_md5hash(t *testing.T) {

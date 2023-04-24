@@ -83,6 +83,7 @@ func (p *Processor) Size() (int, int) {
 	return len(p.rows[0]), len(p.rows)
 }
 
+// Print prints the data in two sections: Titles, if there is no titles, a blank line; and Rows.
 func (p *Processor) Print() {
 	fmt.Println("Titles:")
 	// Keys returns a slice without a determined order
@@ -96,11 +97,13 @@ func (p *Processor) Print() {
 
 }
 
+// Sort sorts the rows according to Markers: which column, in what direction.
 func (p *Processor) Sort(markers []Marker) {
 	sorter := OrderByColumns(markers)
 	sorter.Sort(p.rows)
 }
 
+// Swap swaps two columns identified by their names. If any of name is not found, TitleNotFound error returns.
 func (p *Processor) Swap(i, j string) error {
 	indI, exist := p.titles[i]
 	if !exist {
@@ -117,12 +120,14 @@ func (p *Processor) Swap(i, j string) error {
 	return nil
 }
 
-// Extract gets a sub set of current data by a given slice of title names, the order of columns can be changed.
-// FIXME: new Processor is linked to the source
+// Extract extracts columns named by given title names, the order of extracted columns
+// is defined by the order of given names argument. This can be used to reorder columns
+// when lengths of names equals to titles.
+// The returned [][]string is independent to its source.
 func (p *Processor) Extract(names []string) ([][]string, error) {
 	inds, err := p.titles.indexes(names)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to execute Extract method: %w", err)
 	}
 
 	c := len(names)
@@ -138,23 +143,24 @@ func (p *Processor) Extract(names []string) ([][]string, error) {
 	return extracted, nil
 }
 
-// Convert creates a new Processor with a sub set of current data by a given slice of title names. The order of columns can be changed.
-// The new Processor is linked to the source, so it is a view.
+// Convert creates a new Processor by extracting named columns. The order of resulting columns is
+// defined by the order of given names argument. This can be used to reorder columns
+// when lengths of names equals to titles. The returned Processor is independent to its source.
 func (p *Processor) Convert(names []string) (*Processor, error) {
 	extracted, err := p.Extract(names)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to execute Convert method: %w", err)
 	}
 	return &Processor{createTitle(names), extracted}, nil
 }
 
-// Split uses title names to group rows and creates a slice of new Processor
+// Split uses the values of columns identified by title names to group rows and creates a slice of new Processors.
 // The source Processor should have been sorted, the order of names is significant.
-// The new Processor is linked to the source, so it is a view.
+// The new Processors are linked to the source, so they are views of original.
 func (p *Processor) Split(names []string) ([]*Processor, error) {
 	inds, err := p.titles.indexes(names)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to execute Split method: %w", err)
 	}
 
 	var np []*Processor
@@ -175,6 +181,7 @@ func (p *Processor) Split(names []string) ([]*Processor, error) {
 		for i := 0; i < c; i++ {
 			// any checker is different, it means a new Processor
 			if p.rows[r][inds[i]] != current[i] {
+				// slice a block of rows to create a new Processor and append to the returning slice.
 				np = append(np, &Processor{p.titles, p.rows[start:r]})
 				update(r)
 				start = r
@@ -208,9 +215,9 @@ func (p *Processor) Write(w io.Writer) error {
 
 type Isfunc func(s []string) bool
 
-// Remove uses condition functions to check rows and remove them if conditions are met.
-// This a in place procedure.
-func (p *Processor) Remove(is ...Isfunc) {
+// Filter uses condition functions to check rows and remove them if all conditions are met.
+// This a in place procedure: p.rows are replaced.
+func (p *Processor) Filter(is ...Isfunc) {
 	var (
 		i   int
 		can bool
