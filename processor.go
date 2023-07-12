@@ -307,3 +307,16 @@ func (p *Processor) Replace(cond Isfunc, elems []int, rep func([]string)) {
 		}
 	}
 }
+
+// Derive use two existing columns to derive and add the result to a new column to the end
+func (p *Processor) Derive(inxA, inxB int, name string, op func(a, b string) string) {
+	if _, ok := p.titles[name]; ok {
+		fmt.Println(name, ": cannot existing column name as a new colum")
+		return
+	}
+	p.titles[name] = len(p.titles)
+
+	for i := 0; i < len(p.rows); i++ {
+		p.rows[i] = append(p.rows[i], op(p.rows[i][inxA], p.rows[i][inxB]))
+	}
+}

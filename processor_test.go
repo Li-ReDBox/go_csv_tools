@@ -420,3 +420,20 @@ func TestReplaceRows(t *testing.T) {
 		p.Print()
 	}
 }
+
+func TestDerive(t *testing.T) {
+	records := read(strings.NewReader(basicContent))
+	p := &Processor{createTitle(records[0][:]), records[1:][:]}
+
+	ban := func(fName, lName string) string {
+		return fmt.Sprintf("%s %s has been banned", fName, lName)
+	}
+
+	p.Derive(0, 1, "Message", ban)
+
+	for _, row := range p.rows {
+		if row[3] != ban(row[0], row[1]) {
+			t.Errorf("Failed to ban %s %s. Message is: %s", row[0], row[1], row[3])
+		}
+	}
+}
