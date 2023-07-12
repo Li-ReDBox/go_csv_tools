@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 
 	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
 
 // basic content for testing basic csv processes
@@ -382,5 +384,39 @@ func TestProcessorClone(t *testing.T) {
 		if copy.rows[i][0] == source.rows[i][0] {
 			t.Error("Rows are not fully cloned: changed copy went to source.")
 		}
+	}
+}
+
+func TestReplaceRows(t *testing.T) {
+	p := &Processor{
+		rows: numbersAsStrings()}
+
+	suspectsWithHighScore := func(elems []string) bool {
+		// those suspects cannot achieve higher than 100 in any course. If this is the case, mark them
+		suspects := []string{"glenda", "ken", "baz"}
+		if slices.Contains(suspects, elems[0]) {
+			score, err := strconv.Atoi(elems[2])
+			if err == nil && score > 100 {
+				return true
+			}
+		}
+		return false
+	}
+
+	mark := func(s []string) {
+		s[0] = "Got you"
+	}
+
+	p.Replace(suspectsWithHighScore, []int{2}, mark)
+
+	marked := func(elems []string) bool {
+		return elems[2] == "Got you"
+	}
+
+	// check how many suspects are caught
+	p.Filter([]Isfunc{marked})
+	if len(p.rows) == 0 {
+		t.Error("Replace failed because no rows contains 'Got you' is found")
+		p.Print()
 	}
 }

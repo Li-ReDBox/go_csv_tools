@@ -291,3 +291,19 @@ func createRecords(lines [][]string) []map[string]string {
 
 	return records
 }
+
+// Replace replaces some elements of rows, identified by `elems` using `replacer` when condition defined in cond function are met
+// IsFunc works on a whole row, references elements by their indexes. Elements for replacement are not related the elements used for conditions
+func (p *Processor) Replace(cond Isfunc, elems []int, rep func([]string)) {
+	nCols, nRows := p.Size()
+	if nCols == 0 || nRows == 0 {
+		fmt.Printf("Cannot operate on a zero sized data set: nCols = %d, nRows = %d\n", nCols, nRows)
+		return
+	}
+
+	for i := 0; i < nRows; i++ {
+		if cond(p.rows[i]) {
+			replace(p.rows[i], elems, rep)
+		}
+	}
+}
