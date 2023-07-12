@@ -11,16 +11,15 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-func basicData() string {
-	return `first_name,last_name,username
+// basic content for testing basic csv processes
+const basicContent = `first_name,last_name,username
 "Rob","Pike",rob
 Ken,Thompson,ken
 "Robert","Griesemer","gri"
 `
-}
 
 func TestRead(t *testing.T) {
-	records := read(strings.NewReader(basicData()))
+	records := read(strings.NewReader(basicContent))
 	fmt.Println(records)
 
 	if len(records) == 0 {
