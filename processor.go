@@ -277,7 +277,7 @@ func (p *Processor) Clone() *Processor {
 	return &Processor{p.titles.clone(), r}
 }
 
-// createRecords creates a slice of map with string keys and values
+// createRecords creates a slice of map by turning each line from the second line onwards into a map with string keys come from the first line.
 func createRecords(lines [][]string) []map[string]string {
 	var records []map[string]string
 
