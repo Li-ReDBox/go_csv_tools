@@ -217,7 +217,7 @@ type Isfunc func(s []string) bool
 
 // Filter uses condition functions to check rows and remove them if all conditions are met.
 // This a in place procedure: p.rows are replaced.
-func (p *Processor) Filter(is ...Isfunc) {
+func (p *Processor) Filter(is []Isfunc) {
 	var (
 		i   int
 		can bool

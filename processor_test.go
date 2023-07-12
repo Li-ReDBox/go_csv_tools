@@ -291,7 +291,7 @@ func TestProcessor_Filter(t *testing.T) {
 	}
 
 	runtime.ReadMemStats(&current)
-	p.Filter(cl2, smalltalk)
+	p.Filter([]Isfunc{cl2, smalltalk})
 
 	want, nRows := 3, len(p.rows)
 	if nRows != want {
