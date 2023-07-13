@@ -404,10 +404,14 @@ func TestReplaceRows(t *testing.T) {
 	}
 
 	mark := func(s []string) {
-		s[0] = "Got you"
+		s[2] = "Got you"
 	}
 
-	p.Replace(suspectsWithHighScore, []int{2}, mark)
+	op := Operation{
+		Check: suspectsWithHighScore,
+		Act:   mark,
+	}
+	p.Replace([]Operation{op})
 
 	marked := func(elems []string) bool {
 		return elems[2] == "Got you"
