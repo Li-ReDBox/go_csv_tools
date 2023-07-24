@@ -1,17 +1,8 @@
 package csv
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 )
-
-func TestRowOneColOp(t *testing.T) {
-	records := read(strings.NewReader(basicContent))
-	p := &Processor{createTitle(records[0][:]), records[1:][:]}
-
-	fmt.Println(p.Size())
-}
 
 func TestBiOp(t *testing.T) {
 	original := []string{"a", "b", "c"}
