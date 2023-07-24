@@ -5,30 +5,6 @@ import (
 	"testing"
 )
 
-func TestCompareNumStrings(t *testing.T) {
-	tests := []struct {
-		s1, s2 string
-		r      bool
-	}{
-		{"", "", false},
-		{"80", "100", false}, // this string comparison is different to numbers
-		{"80", "81", true},
-		{"7", "81000", true},  // this string comparison is different to numbers
-		{"8", "81000", true},  // this string comparison is different to numbers
-		{"9", "81000", false}, // this string comparison is different to numbers
-		{"a", "b", true},
-		{"b", "a", false},
-		{"a", "aa", true},
-		{"aa", "a", false},
-	}
-	for _, s := range tests {
-		cmp := s.s1 < s.s2
-		if cmp != s.r {
-			t.Errorf("%s < %s failed, it is %t, but want %t", s.s1, s.s2, cmp, s.r)
-		}
-	}
-}
-
 func TestIntType(t *testing.T) {
 	// Compile the expression once, usually at init time.
 	// Use raw strings to avoid having to quote the backslashes.
