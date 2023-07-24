@@ -203,3 +203,51 @@ func Example_sortRows() {
 	// Output:
 	// [[dmr C 100] [glenda Go 200] [gri Smalltalk 80] [gri Go 100] [ken C 150] [ken Go 200] [r Go 100] [r C 150] [rsc Go 200]]
 }
+
+// Example_sortDates demonstrates how to formalise dates to ISO 8601 and use it in sorting.
+// Note: If replacing to ISO 8601 dates is not desirable, sorting can be done by duplicating a column of date (not implemented)
+// for sorting then remove var Convert method.
+// Or var two replacements: first to ISO 8601 then replace the column back after sorting. No new feature is needed.
+func Example_sortDates() {
+	const dates = `date
+12/12/2005
+31/1/2005
+1/1/2005
+`
+	records := read(strings.NewReader(dates))
+	p := &Processor{createTitle(records[0][:]), records[1:][:]}
+
+	pad := func(d string) string {
+		// only day and month are processed in this example
+		if len(d) == 2 {
+			return d
+		}
+		return "0" + d
+	}
+
+	formatter := func(elems []string) {
+		ps := strings.Split(elems[0], "/")
+
+		// reformat to ISO 8601
+		elems[0] = fmt.Sprintf("%s-%s-%s", ps[2], pad(ps[1]), pad(ps[0]))
+	}
+
+	op := Operation{
+		Check: func(elems []string) bool { return true },
+		Act:   formatter,
+	}
+	p.Replace([]Operation{op})
+
+	markers := []Marker{{0, Descending}}
+	p.Sort(markers)
+
+	p.Print()
+
+	// Output:
+	// Titles:
+	// date
+	// Rows:
+	// 1 2005-12-12
+	// 2 2005-01-31
+	// 3 2005-01-01
+}
