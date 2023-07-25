@@ -214,7 +214,7 @@ func Example_sortDates() {
 31/1/2005
 1/1/2005
 `
-	records := read(strings.NewReader(dates))
+	records, _ := read(strings.NewReader(dates))
 	p := &Processor{createTitle(records[0][:]), records[1:][:]}
 
 	pad := func(d string) string {

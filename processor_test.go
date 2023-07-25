@@ -21,7 +21,7 @@ Ken,Thompson,ken
 `
 
 func TestRead(t *testing.T) {
-	records := read(strings.NewReader(basicContent))
+	records, _ := read(strings.NewReader(basicContent))
 	fmt.Println(records)
 
 	if len(records) == 0 {
@@ -426,7 +426,7 @@ func TestReplaceRows(t *testing.T) {
 }
 
 func TestDerive(t *testing.T) {
-	records := read(strings.NewReader(basicContent))
+	records, _ := read(strings.NewReader(basicContent))
 	p := &Processor{createTitle(records[0][:]), records[1:][:]}
 
 	ban := func(fName, lName string) string {

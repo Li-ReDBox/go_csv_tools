@@ -11,8 +11,8 @@ import (
 	"strings"
 )
 
-// NewProcessor opens a csv file named as fileName and returns *Processor
-// when there is no error otherwise it logs error and exits
+// NewProcessor opens a csv file named by fileName and returns *Processor
+// when there is no error, otherwise it logs error and exits
 func NewProcessor(fileName string) *Processor {
 	fmt.Println("We will be process csv = ", fileName)
 
@@ -22,15 +22,18 @@ func NewProcessor(fileName string) *Processor {
 		log.Fatal(err)
 	}
 
-	records := read(file)
+	records, err := read(file)
+	ce := file.Close()
 
-	p := &Processor{createTitle(records[0][:]), records[1:][:]}
-
-	if err := file.Close(); err != nil {
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	return p
+	if ce != nil {
+		log.Fatal(ce)
+	}
+
+	return &Processor{createTitle(records[0][:]), records[1:][:]}
 }
 
 type Processor struct {
@@ -39,39 +42,14 @@ type Processor struct {
 	rows   [][]string
 }
 
-// Load loads the content of a csv file. The first line of the content will be used
-// to define titles.
-// Can use os.DirFs(".") as system
-// I would like to use os.Open(name string) (*File, error) to interact with csv file in storage
-// Files need to be closed after reading. There are things convoluted I have not figured out a way
-// to deal with them clearly
-// func (p Processor) Load(system fs.FS, name string) {
-// 	fmt.Println("Open", name)
-
-// 	f, err := system.Open(name)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	defer f.Close()
-
-// 	p.Read(f)
-
-// }
-
+// read is a wrapper of csv.Reader.ReadAll.
 // csv.NewReader needs an io.Reader. fs.File defines Reader interface
-// os.File is one implementation.
-// What I want to start with is a file name.
-// To open a file,
-func read(source io.Reader) [][]string {
+// os.File is one implementation and strings.NewReader is another one.
+// It exists for supporting tests.
+func read(source io.Reader) ([][]string, error) {
 	r := csv.NewReader(source)
 
-	records, err := r.ReadAll()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return records
+	return r.ReadAll()
 }
 
 // Size returns the number of columns and the number of rows of matrix rows in that order.
@@ -104,6 +82,7 @@ func (p *Processor) Sort(markers []Marker) {
 }
 
 // Swap swaps two columns identified by their names. If any of name is not found, TitleNotFound error returns.
+// Swap definitely needs titles.
 func (p *Processor) Swap(i, j string) error {
 	indI, exist := p.titles[i]
 	if !exist {
@@ -124,6 +103,7 @@ func (p *Processor) Swap(i, j string) error {
 // is defined by the order of given names argument. This can be used to reorder columns
 // when lengths of names equals to titles.
 // The returned [][]string is independent to its source.
+// Extract definitely needs titles.
 func (p *Processor) Extract(names []string) ([][]string, error) {
 	inds, err := p.titles.indexes(names)
 	if err != nil {
@@ -146,6 +126,7 @@ func (p *Processor) Extract(names []string) ([][]string, error) {
 // Convert creates a new Processor by extracting named columns. The order of resulting columns is
 // defined by the order of given names argument. This can be used to reorder columns
 // when lengths of names equals to titles. The returned Processor is independent to its source.
+// Convert definitely needs titles.
 func (p *Processor) Convert(names []string) (*Processor, error) {
 	extracted, err := p.Extract(names)
 	if err != nil {
@@ -157,6 +138,7 @@ func (p *Processor) Convert(names []string) (*Processor, error) {
 // Split uses the values of columns identified by title names to group rows and creates a slice of new Processors.
 // The source Processor should have been sorted, the order of names is significant.
 // The new Processors are linked to the source, so they are views of original.
+// Split definitely needs titles.
 func (p *Processor) Split(names []string) ([]*Processor, error) {
 	inds, err := p.titles.indexes(names)
 	if err != nil {
@@ -308,6 +290,7 @@ func (p *Processor) Replace(ops []Operation) {
 }
 
 // Derive use two existing columns to derive and add the result to a new column to the end
+// Derive definitely needs titles
 func (p *Processor) Derive(inxA, inxB int, name string, op func(a, b string) string) {
 	if _, ok := p.titles[name]; ok {
 		fmt.Println(name, ": cannot existing column name as a new colum")
