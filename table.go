@@ -11,9 +11,9 @@ import (
 	"strings"
 )
 
-// NewProcessor opens a csv file named by fileName and returns *Processor
+// NewTable opens a csv file named by fileName and returns *Table
 // when there is no error, otherwise it logs error and exits
-func NewProcessor(fileName string) *Processor {
+func NewTable(fileName string) *Table {
 	fmt.Println("We will be process csv = ", fileName)
 
 	file, err := os.Open(fileName)
@@ -33,11 +33,14 @@ func NewProcessor(fileName string) *Processor {
 		log.Fatal(ce)
 	}
 
-	return &Processor{createTitle(records[0][:]), records[1:][:]}
+	return &Table{createTitle(records[0][:]), records[1:][:]}
 }
 
-type Processor struct {
-	// titles is optional
+// Table is a data structure, so the name is not a good choice
+// The data are rows, with (optional) titles, more like a table.
+type Table struct {
+	// titles is optional internally, but as column methods needs them to work correctly,
+	// the NewTable function automatically take the first row as the titles.
 	titles Title
 	rows   [][]string
 }
@@ -53,7 +56,7 @@ func read(source io.Reader) ([][]string, error) {
 }
 
 // Size returns the number of columns and the number of rows of matrix rows in that order.
-func (p *Processor) Size() (int, int) {
+func (p *Table) Size() (int, int) {
 	if p == nil {
 		return 0, 0
 	}
@@ -62,7 +65,7 @@ func (p *Processor) Size() (int, int) {
 }
 
 // Print prints the data in two sections: Titles, if there is no titles, a blank line; and Rows.
-func (p *Processor) Print() {
+func (p *Table) Print() {
 	fmt.Println("Titles:")
 	// Keys returns a slice without a determined order
 	fmt.Println(strings.Join(p.titles.names(), ", "))
@@ -76,14 +79,14 @@ func (p *Processor) Print() {
 }
 
 // Sort sorts the rows according to Markers: which column, in what direction.
-func (p *Processor) Sort(markers []Marker) {
+func (p *Table) Sort(markers []Marker) {
 	sorter := OrderByColumns(markers)
 	sorter.Sort(p.rows)
 }
 
 // Swap swaps two columns identified by their names. If any of name is not found, TitleNotFound error returns.
 // Swap definitely needs titles.
-func (p *Processor) Swap(i, j string) error {
+func (p *Table) Swap(i, j string) error {
 	indI, exist := p.titles[i]
 	if !exist {
 		return TitleNotFound(i)
@@ -104,7 +107,7 @@ func (p *Processor) Swap(i, j string) error {
 // when lengths of names equals to titles.
 // The returned [][]string is independent to its source.
 // Extract definitely needs titles.
-func (p *Processor) Extract(names []string) ([][]string, error) {
+func (p *Table) Extract(names []string) ([][]string, error) {
 	inds, err := p.titles.indexes(names)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute Extract method: %w", err)
@@ -123,29 +126,29 @@ func (p *Processor) Extract(names []string) ([][]string, error) {
 	return extracted, nil
 }
 
-// Convert creates a new Processor by extracting named columns. The order of resulting columns is
+// Convert creates a new Table by extracting named columns. The order of resulting columns is
 // defined by the order of given names argument. This can be used to reorder columns
-// when lengths of names equals to titles. The returned Processor is independent to its source.
+// when lengths of names equals to titles. The returned Table is independent to its source.
 // Convert definitely needs titles.
-func (p *Processor) Convert(names []string) (*Processor, error) {
+func (p *Table) Convert(names []string) (*Table, error) {
 	extracted, err := p.Extract(names)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute Convert method: %w", err)
 	}
-	return &Processor{createTitle(names), extracted}, nil
+	return &Table{createTitle(names), extracted}, nil
 }
 
-// Split uses the values of columns identified by title names to group rows and creates a slice of new Processors.
-// The source Processor should have been sorted, the order of names is significant.
-// The new Processors are linked to the source, so they are views of original.
+// Split uses the values of columns identified by title names to group rows and creates a slice of new Tables.
+// The source Table should have been sorted, the order of names is significant.
+// The new Tables are linked to the source, so they are views of original.
 // Split definitely needs titles.
-func (p *Processor) Split(names []string) ([]*Processor, error) {
+func (p *Table) Split(names []string) ([]*Table, error) {
 	inds, err := p.titles.indexes(names)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute Split method: %w", err)
 	}
 
-	var np []*Processor
+	var np []*Table
 	c := len(names)
 	current := make([]string, c)
 
@@ -161,10 +164,10 @@ func (p *Processor) Split(names []string) ([]*Processor, error) {
 
 	for r := 1; r < crows; r++ {
 		for i := 0; i < c; i++ {
-			// any checker is different, it means a new Processor
+			// any checker is different, it means a new Table
 			if p.rows[r][inds[i]] != current[i] {
-				// slice a block of rows to create a new Processor and append to the returning slice.
-				np = append(np, &Processor{p.titles, p.rows[start:r]})
+				// slice a block of rows to create a new Table and append to the returning slice.
+				np = append(np, &Table{p.titles, p.rows[start:r]})
 				update(r)
 				start = r
 				break
@@ -172,14 +175,14 @@ func (p *Processor) Split(names []string) ([]*Processor, error) {
 		}
 	}
 	if start < len(p.rows) {
-		np = append(np, &Processor{p.titles, p.rows[start:]})
+		np = append(np, &Table{p.titles, p.rows[start:]})
 	}
 
 	return np, nil
 }
 
 // Write the data to the Writer w
-func (p *Processor) Write(w io.Writer) error {
+func (p *Table) Write(w io.Writer) error {
 	var tErr, lErr, fErr error
 	writer := csv.NewWriter(w)
 	names := p.titles.names()
@@ -199,7 +202,7 @@ type Isfunc func(elems []string) bool
 
 // Filter uses condition functions to check rows and remove them if all conditions are met.
 // This a in place procedure: p.rows are replaced.
-func (p *Processor) Filter(is []Isfunc) {
+func (p *Table) Filter(is []Isfunc) {
 	var (
 		i   int
 		can bool
@@ -227,8 +230,8 @@ func md5hash(o []string) string {
 	return fmt.Sprintf("%x", sum)
 }
 
-// Unique creates a new Processor from the current one by removing all the duplicates
-func (p *Processor) Unique() *Processor {
+// Unique creates a new Table from the current one by removing all the duplicates
+func (p *Table) Unique() *Table {
 	markers := make(map[string]struct{})
 
 	nCols, nRows := p.Size()
@@ -244,11 +247,11 @@ func (p *Processor) Unique() *Processor {
 		}
 	}
 
-	return &Processor{p.titles, unique}
+	return &Table{p.titles, unique}
 }
 
-// Clone makes a complete new Processor from the current one, so both can be processed independently.
-func (p *Processor) Clone() *Processor {
+// Clone makes a complete new Table from the current one, so both can be processed independently.
+func (p *Table) Clone() *Table {
 	nCols, nRows := p.Size()
 	r := make([][]string, 0, nRows)
 	for i := 0; i < nRows; i++ {
@@ -256,7 +259,7 @@ func (p *Processor) Clone() *Processor {
 		copy(c, p.rows[i])
 		r = append(r, c)
 	}
-	return &Processor{p.titles.clone(), r}
+	return &Table{p.titles.clone(), r}
 }
 
 // createRecords creates a slice of map by turning each line from the second line onwards into a map with string keys come from the first line.
@@ -275,7 +278,7 @@ func createRecords(lines [][]string) []map[string]string {
 }
 
 // Replace replaces some elements of rows. Each operation has a condition checker and an act to be performed when the conditions are met.
-func (p *Processor) Replace(ops []Operation) {
+func (p *Table) Replace(ops []Operation) {
 	nCols, nRows := p.Size()
 	if nCols == 0 || nRows == 0 {
 		fmt.Printf("Cannot operate on a zero sized data set: nCols = %d, nRows = %d\n", nCols, nRows)
@@ -291,7 +294,7 @@ func (p *Processor) Replace(ops []Operation) {
 
 // Derive use two existing columns to derive and add the result to a new column to the end
 // Derive definitely needs titles
-func (p *Processor) Derive(inxA, inxB int, name string, op func(a, b string) string) {
+func (p *Table) Derive(inxA, inxB int, name string, op func(a, b string) string) {
 	if _, ok := p.titles[name]; ok {
 		fmt.Println(name, ": cannot existing column name as a new colum")
 		return

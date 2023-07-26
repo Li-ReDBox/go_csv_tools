@@ -161,8 +161,8 @@ func TestReorder(t *testing.T) {
 	}
 }
 
-func TestProcessor_Swap_notFound(t *testing.T) {
-	p := &Processor{rows: numbersAsStrings()}
+func TestTable_Swap_notFound(t *testing.T) {
+	p := &Table{rows: numbersAsStrings()}
 	err := p.Swap("first_name", "last_name")
 
 	if err == nil {
@@ -203,8 +203,8 @@ func TestTitleNotFound_Is(t *testing.T) {
 	}
 }
 
-func TestProcessor_Write(t *testing.T) {
-	p := &Processor{
+func TestTable_Write(t *testing.T) {
+	p := &Table{
 		rows: numbersAsStrings()}
 	o := `gri,Go,100
 ken,C,150
@@ -227,7 +227,7 @@ gri,Smalltalk,80
 	}
 }
 
-func TestProcessor_Split(t *testing.T) {
+func TestTable_Split(t *testing.T) {
 	titles := createTitle([]string{"language", "level", "value"})
 
 	source := [][]string{
@@ -244,7 +244,7 @@ func TestProcessor_Split(t *testing.T) {
 		{"Go", "L1", "11"},
 		{"Smalltalk", "L1", "12"},
 	}
-	p := &Processor{titles, source}
+	p := &Table{titles, source}
 
 	names := []string{"level", "language"}
 	inds, _ := titles.indexes(names)
@@ -253,7 +253,7 @@ func TestProcessor_Split(t *testing.T) {
 
 	np, _ := p.Split(names)
 	if len(np) != 6 {
-		t.Errorf("Wanted to get 6 new Processors, but got %d", len(np))
+		t.Errorf("Wanted to get 6 new Tables, but got %d", len(np))
 		p.Print()
 		for _, n := range np {
 			n.Print()
@@ -261,7 +261,7 @@ func TestProcessor_Split(t *testing.T) {
 	}
 }
 
-func TestProcessor_Filter(t *testing.T) {
+func TestTable_Filter(t *testing.T) {
 	var current, after runtime.MemStats
 
 	source := [][]string{
@@ -279,7 +279,7 @@ func TestProcessor_Filter(t *testing.T) {
 		{"Smalltalk", "L1", "12"}, // smalltalk
 	}
 
-	p := &Processor{rows: source}
+	p := &Table{rows: source}
 
 	cl2 := func(r []string) bool {
 		if r[0] == "C" && r[1] == "L2" {
@@ -325,7 +325,7 @@ func Test_md5hash(t *testing.T) {
 	}
 }
 
-func TestProcessor_Unique(t *testing.T) {
+func TestTable_Unique(t *testing.T) {
 	source := [][]string{
 		{"C", "L1", "1"},
 		{"JS", "L2", "6"},
@@ -341,7 +341,7 @@ func TestProcessor_Unique(t *testing.T) {
 		{"Smalltalk", "L1", "12"},
 	}
 
-	p := &Processor{rows: source}
+	p := &Table{rows: source}
 	np := p.Unique()
 
 	if len(np.rows) != 4 {
@@ -354,9 +354,9 @@ func TestProcessor_Unique(t *testing.T) {
 	}
 }
 
-func TestProcessorClone(t *testing.T) {
+func TestTableClone(t *testing.T) {
 	data := basicRows()
-	source := &Processor{
+	source := &Table{
 		createTitle(data[0]),
 		data[1:],
 	}
@@ -364,7 +364,7 @@ func TestProcessorClone(t *testing.T) {
 	copy := source.Clone()
 
 	if copy == source {
-		t.Errorf("Clone did not produce a new Processor, want = %v, got = %v\n", source, copy)
+		t.Errorf("Clone did not produce a new Table, want = %v, got = %v\n", source, copy)
 	}
 
 	if !maps.Equal(source.titles, copy.titles) {
@@ -388,7 +388,7 @@ func TestProcessorClone(t *testing.T) {
 }
 
 func TestReplaceRows(t *testing.T) {
-	p := &Processor{
+	p := &Table{
 		rows: numbersAsStrings()}
 
 	suspectsWithHighScore := func(elems []string) bool {
@@ -427,7 +427,7 @@ func TestReplaceRows(t *testing.T) {
 
 func TestDerive(t *testing.T) {
 	records, _ := read(strings.NewReader(basicContent))
-	p := &Processor{createTitle(records[0][:]), records[1:][:]}
+	p := &Table{createTitle(records[0][:]), records[1:][:]}
 
 	ban := func(fName, lName string) string {
 		return fmt.Sprintf("%s %s has been banned", fName, lName)

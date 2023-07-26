@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-func ExampleProcessor_Swap() {
-	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
+func ExampleTable_Swap() {
+	p := &Table{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
 	p.Swap("sub", "user")
 	p.Print()
 
@@ -25,10 +25,10 @@ func ExampleProcessor_Swap() {
 	// 9 Smalltalk, gri, 80
 }
 
-func ExampleProcessor_Sort_ascending() {
+func ExampleTable_Sort_ascending() {
 	markers := []Marker{{0, Ascending}, {2, Ascending}}
 
-	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
+	p := &Table{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
 	p.Sort(markers)
 	p.Print()
 
@@ -47,11 +47,11 @@ func ExampleProcessor_Sort_ascending() {
 	// 9 rsc, Go, 200
 }
 
-func ExampleProcessor_Sort_mixed() {
+func ExampleTable_Sort_mixed() {
 	titles := createTitle([]string{"user", "sub", "scores"})
 	nms := []NamedMarker{{"user", Ascending}, {"scores", Descending}}
 
-	p := &Processor{titles, numbersAsStrings()}
+	p := &Table{titles, numbersAsStrings()}
 	markers, err := titles.sortingMarkers(nms)
 	if err == nil {
 		p.Sort(markers)
@@ -73,8 +73,8 @@ func ExampleProcessor_Sort_mixed() {
 	// 9 rsc, Go, 200
 }
 
-func ExampleProcessor_Extract() {
-	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
+func ExampleTable_Extract() {
+	p := &Table{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
 	sub, _ := p.Extract([]string{"sub", "user"})
 
 	for i, row := range sub {
@@ -93,8 +93,8 @@ func ExampleProcessor_Extract() {
 	// 9 Smalltalk, gri
 }
 
-func ExampleProcessor_Convert() {
-	p := &Processor{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
+func ExampleTable_Convert() {
+	p := &Table{createTitle([]string{"user", "sub", "scores"}), numbersAsStrings()}
 	c, err := p.Convert([]string{"scores", "user"})
 
 	if err == nil {
@@ -119,10 +119,10 @@ func ExampleProcessor_Convert() {
 	// 9 80, gri
 }
 
-// ExampleProcessor_split shows how to split a sorted dataset
-func ExampleProcessor_Split() {
+// ExampleTable_split shows how to split a sorted dataset
+func ExampleTable_Split() {
 	titles := createTitle([]string{"user", "sub", "scores"})
-	p := &Processor{titles, numbersAsStrings()}
+	p := &Table{titles, numbersAsStrings()}
 
 	names := []string{"sub"}
 	inds, _ := titles.indexes(names)
@@ -176,9 +176,9 @@ func ExampleProcessor_Split() {
 	//
 }
 
-func ExampleProcessor_Unique() {
+func ExampleTable_Unique() {
 	dup := append(basicRows(), basicRows()...)
-	p := Processor{rows: dup}
+	p := Table{rows: dup}
 	np := p.Unique()
 	np.Print()
 
@@ -215,7 +215,7 @@ func Example_sortDates() {
 1/1/2005
 `
 	records, _ := read(strings.NewReader(dates))
-	p := &Processor{createTitle(records[0][:]), records[1:][:]}
+	p := &Table{createTitle(records[0][:]), records[1:][:]}
 
 	pad := func(d string) string {
 		// only day and month are processed in this example
